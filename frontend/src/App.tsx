@@ -17,7 +17,18 @@ import Upload from './screens/Setup/Upload'
  * route renders a marker so the shape of the app is visible and navigable.
  */
 function Placeholder({ name }: { name: string }) {
-  return <main style={{ padding: 'var(--s-8)' }}>{name}</main>
+  // A bare route marker reads as a broken page to anyone testing the app.
+  // Say plainly that the screen is unbuilt, and offer the way back.
+  return (
+    <main style={{ padding: 'var(--s-8)', maxWidth: '32rem' }}>
+      <h1 style={{ marginBottom: 'var(--s-3)' }}>{name}</h1>
+      <p style={{ color: 'var(--ink-muted, #9da1b2)', marginBottom: 'var(--s-4)' }}>
+        This screen is not built yet — the backend for it is complete, the UI is
+        on its way. Nothing is broken.
+      </p>
+      <a href="/">← Back to home</a>
+    </main>
+  )
 }
 
 export default function App() {
