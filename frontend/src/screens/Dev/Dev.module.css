@@ -70,6 +70,21 @@
   line-height: 1;
 }
 
+.probe {
+  margin: 0;
+  padding: var(--s-4);
+  background: var(--vessel);
+  border: 1px solid var(--rim);
+  border-radius: var(--r-control);
+  font: var(--fs-mono-sm);
+  letter-spacing: var(--tr-mono-sm);
+  color: var(--ash);
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 320px;
+  overflow: auto;
+}
+
 .orbRow {
   display: flex;
   flex-wrap: wrap;

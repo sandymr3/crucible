@@ -2,8 +2,10 @@ import { useEffect, useMemo, useState } from 'react'
 import { Lightbulb, CornerDownLeft, Keyboard, Square } from 'lucide-react'
 
 import { Orb, useAmplitude } from '../../components/orb'
+import * as api from '../../lib/api'
 import { PERSONA_FALLBACK_NAME, PERSONA_IDS, type PersonaId } from '../../lib/persona'
 import type { LiveState } from '../../lib/protocol'
+import { useAuth } from '../../store/auth'
 
 import {
   Button,
@@ -86,6 +88,23 @@ export default function Dev() {
   const [persona, setPersona] = useState<PersonaId>('tech_lead')
   const [speaking, setSpeaking] = useState(false)
   const amplitude = useAmplitude()
+
+  const auth = useAuth()
+  const [probe, setProbe] = useState<string>('')
+
+  async function runProbe(label: string, fn: () => Promise<unknown>) {
+    setProbe(`${label}…`)
+    try {
+      const result = await fn()
+      setProbe(`${label} → ${JSON.stringify(result, null, 2)}`)
+    } catch (error) {
+      const detail =
+        error instanceof api.ApiError
+          ? `${error.status} ${error.code}: ${error.message}`
+          : String(error)
+      setProbe(`${label} ✗ ${detail}`)
+    }
+  }
 
   // Stands in for the audio pipeline until it exists. Shaped like speech —
   // syllables inside phrases, with pauses — rather than noise, because a
@@ -182,6 +201,69 @@ export default function Dev() {
             </div>
           ))}
         </div>
+      </section>
+
+      <section className={s.section}>
+        <h2 className={s.sectionHead}>Auth &amp; API</h2>
+        <div className={s.controls}>
+          {!auth.configured && (
+            <Label tone="quiet">
+              VITE_FIREBASE_* not set — copy .env.example to .env.local
+            </Label>
+          )}
+          {auth.loading ? (
+            <Label tone="quiet">checking session…</Label>
+          ) : auth.user ? (
+            <>
+              <Label tone="loud">
+                {auth.user.isAnonymous ? 'guest' : (auth.user.email ?? auth.user.uid)}
+              </Label>
+              <Button variant="ghost" onClick={() => auth.signOut()}>
+                Sign out
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button
+                variant="primary"
+                onClick={() => auth.signInGoogle()}
+                disabled={!auth.configured}
+              >
+                Sign in with Google
+              </Button>
+              <Button onClick={() => auth.signInGuest()} disabled={!auth.configured}>
+                Continue as guest
+              </Button>
+            </>
+          )}
+          {auth.error && <Label tone="accent" style={{ color: 'var(--t-assay)' }}>{auth.error}</Label>}
+        </div>
+
+        <div className={s.controls}>
+          <Button size="compact" onClick={() => runProbe('GET /health', api.health)}>
+            /health
+          </Button>
+          <Button size="compact" onClick={() => runProbe('GET /v1/me', api.getMe)}>
+            /v1/me
+          </Button>
+          <Button size="compact" onClick={() => runProbe('GET /v1/personas', api.listPersonas)}>
+            /v1/personas
+          </Button>
+          <Button size="compact" onClick={() => runProbe('GET /v1/sessions', api.listSessions)}>
+            /v1/sessions
+          </Button>
+          <Button
+            size="compact"
+            onClick={() =>
+              runProbe('POST /v1/sessions (replay)', () =>
+                api.createSession({ mode: 'replay', fixtureId: 'demo-ml-engineer' }),
+              )
+            }
+          >
+            create replay session
+          </Button>
+        </div>
+        {probe && <pre className={s.probe}>{probe}</pre>}
       </section>
 
       <section className={s.section}>
