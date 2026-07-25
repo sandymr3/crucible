@@ -7,6 +7,10 @@ import Home from './screens/Home/Home'
 import LiveRoom from './screens/LiveRoom/LiveRoom'
 import Report from './screens/Report/Report'
 import Roadmap from './screens/Roadmap/Roadmap'
+import DigestReveal from './screens/Setup/DigestReveal'
+import PlanEditor from './screens/Setup/PlanEditor'
+import StartSession from './screens/Setup/StartSession'
+import Upload from './screens/Setup/Upload'
 
 /**
  * Route map from the screen spec. Screens land one per build step; until then a
@@ -25,13 +29,13 @@ export default function App() {
       <div style={{ position: 'relative', zIndex: 1 }}>
         <Routes>
           <Route path="/" element={<Home />} />
-          {/* The setup flow lands in a later step; the entry route exists now so
-              the home page's CTA is not a dead link. */}
-          <Route path="/setup" element={<Placeholder name="Setup" />} />
-          <Route path="/setup/:id" element={<Placeholder name="Setup" />} />
-          <Route path="/setup/:id/digest" element={<Placeholder name="Digest" />} />
-          <Route path="/setup/:id/persona" element={<Placeholder name="Persona" />} />
-          <Route path="/setup/:id/plan" element={<Placeholder name="Plan" />} />
+          {/* Persona is chosen at /setup rather than after the digest: the
+              backend writes it only at session creation, and uploading a resume
+              needs a session to attach it to. */}
+          <Route path="/setup" element={<StartSession />} />
+          <Route path="/setup/:id" element={<Upload />} />
+          <Route path="/setup/:id/digest" element={<DigestReveal />} />
+          <Route path="/setup/:id/plan" element={<PlanEditor />} />
           <Route path="/room/:id" element={<LiveRoom />} />
           <Route path="/report/:id" element={<Report />} />
           <Route path="/roadmap/:id" element={<Roadmap />} />

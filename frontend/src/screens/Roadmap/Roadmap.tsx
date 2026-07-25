@@ -29,7 +29,9 @@ export default function Roadmap() {
       // This is the loop closing: a new session inheriting the digest, JD and
       // resume, so nothing is re-uploaded, one band above where they finished.
       const created = await api.startRetest(id)
-      navigate(`/setup/${created.sessionId}/persona`)
+      // Straight to the plan: the retest already carries the digest, resume, JD
+      // and its recommended persona, so nothing needs re-uploading or choosing.
+      navigate(`/setup/${created.sessionId}/plan`)
     } catch (err) {
       setRetestError(
         err instanceof api.ApiError

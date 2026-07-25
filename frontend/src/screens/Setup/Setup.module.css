@@ -1,0 +1,446 @@
+/**
+ * The setup flow: mode, upload, digest, persona, plan.
+ *
+ * Everything before the room. It is short on purpose — the product is the
+ * conversation, and every screen here is something standing between the
+ * candidate and it.
+ */
+
+.page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: var(--s-8) var(--s-6) var(--s-24);
+  display: grid;
+  gap: var(--s-6);
+  min-height: 100dvh;
+  align-content: start;
+}
+
+.wide {
+  max-width: var(--page-max);
+}
+
+.steps {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding-bottom: var(--s-5);
+  border-bottom: 1px solid var(--rim);
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  color: var(--dust);
+}
+
+.stepDot {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--r-full);
+  background: currentColor;
+}
+
+.stepActive {
+  color: var(--heat-hot);
+}
+
+.stepDone {
+  color: var(--ash);
+}
+
+.stepSep {
+  flex: 1;
+  height: 1px;
+  background: var(--rim);
+  max-width: 32px;
+}
+
+.title {
+  font: var(--fs-h1);
+  letter-spacing: var(--tr-h1);
+  color: var(--bone);
+}
+
+.lede {
+  font: var(--fs-body);
+  color: var(--ash);
+  max-width: 58ch;
+}
+
+.actions {
+  display: flex;
+  gap: var(--s-3);
+  align-items: center;
+  padding-top: var(--s-4);
+}
+
+.spacer {
+  flex: 1;
+}
+
+.error {
+  padding: var(--s-4) var(--s-5);
+  border: 1px solid color-mix(in oklch, var(--t-assay) 40%, var(--rim));
+  border-radius: var(--r-control);
+  background: color-mix(in oklch, var(--t-assay) 8%, var(--vessel));
+  color: var(--bone);
+  font: var(--fs-small);
+}
+
+/* ── mode choice ─────────────────────────────────────────────────────── */
+
+.modes {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--s-4);
+}
+
+.mode {
+  position: relative;
+  display: grid;
+  gap: var(--s-3);
+  align-content: start;
+  text-align: left;
+  padding: var(--s-6);
+  border: 1px solid var(--rim);
+  border-radius: var(--r-panel);
+  background: var(--vessel);
+  overflow: hidden;
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out);
+}
+
+.mode::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  background: var(--mode-accent);
+  opacity: 0;
+  transition: opacity var(--dur-fast) var(--ease-out);
+}
+
+.mode:hover {
+  border-color: var(--rim-lit);
+  background: var(--vessel-high);
+}
+
+.mode:hover::before,
+.modeSelected::before {
+  opacity: 1;
+}
+
+.modeSelected {
+  border-color: color-mix(in oklch, var(--mode-accent) 45%, var(--rim));
+  background: var(--vessel-high);
+}
+
+.modeName {
+  font: var(--fs-h3);
+  letter-spacing: var(--tr-h3);
+  color: var(--bone);
+}
+
+.modeBody {
+  font: var(--fs-small);
+  color: var(--ash);
+}
+
+/* ── upload ──────────────────────────────────────────────────────────── */
+
+.dropzone {
+  display: grid;
+  place-items: center;
+  gap: var(--s-3);
+  padding: var(--s-14) var(--s-6);
+  border: 1px dashed var(--rim-lit);
+  border-radius: var(--r-panel);
+  background: var(--vessel);
+  text-align: center;
+  cursor: pointer;
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out);
+}
+
+.dropzone:hover,
+.dropzoneActive {
+  border-color: var(--heat-hot);
+  background: var(--vessel-high);
+}
+
+.dropzoneName {
+  font: var(--fs-body);
+  color: var(--bone);
+}
+
+.hiddenInput {
+  display: none;
+}
+
+.textarea {
+  width: 100%;
+  min-height: 220px;
+  resize: vertical;
+  padding: var(--s-4);
+  background: var(--vessel-high);
+  border: 1px solid var(--rim);
+  border-radius: var(--r-control);
+  color: var(--bone);
+  font: var(--fs-small);
+  line-height: 1.6;
+}
+
+.textarea::placeholder {
+  color: var(--dust);
+}
+
+.counter {
+  display: block;
+  text-align: right;
+  margin-top: var(--s-2);
+}
+
+.counterWarn {
+  color: var(--t-warm) !important;
+}
+
+/* ── digest ──────────────────────────────────────────────────────────── */
+
+.working {
+  display: grid;
+  justify-items: center;
+  gap: var(--s-5);
+  padding: var(--s-24) var(--s-6);
+  text-align: center;
+}
+
+.stages {
+  display: grid;
+  gap: var(--s-3);
+  justify-items: start;
+  margin-top: var(--s-4);
+}
+
+.stage {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  color: var(--dust);
+  transition: color var(--dur-base) var(--ease-out);
+}
+
+.stageCurrent {
+  color: var(--bone);
+}
+
+.stagePast {
+  color: var(--ash);
+}
+
+.stageMark {
+  width: 14px;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.claims {
+  display: grid;
+  gap: var(--s-3);
+}
+
+.claim {
+  display: grid;
+  gap: var(--s-3);
+  padding: var(--s-5);
+  border: 1px solid var(--rim);
+  border-radius: var(--r-panel);
+  background: var(--vessel);
+}
+
+.claimText {
+  font: var(--fs-body);
+  color: var(--bone);
+}
+
+.claimMeta {
+  display: flex;
+  gap: var(--s-3);
+  align-items: baseline;
+  flex-wrap: wrap;
+}
+
+/* The probe angles are the demo beat: reading the questions it has already
+   found is genuinely uncomfortable, which is the point. */
+.probes {
+  margin: 0;
+  padding-left: var(--s-5);
+  display: grid;
+  gap: var(--s-2);
+  border-top: 1px solid var(--rim);
+  padding-top: var(--s-4);
+}
+
+.probe {
+  font: var(--fs-small);
+  color: var(--ash);
+}
+
+/* ── personas ────────────────────────────────────────────────────────── */
+
+.personaGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--s-4);
+}
+
+.persona {
+  display: grid;
+  justify-items: center;
+  gap: var(--s-4);
+  text-align: center;
+  padding: var(--s-8) var(--s-5);
+  border: 1px solid var(--rim);
+  border-radius: var(--r-panel);
+  background: var(--vessel);
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out);
+}
+
+.persona:hover {
+  border-color: color-mix(in oklch, var(--persona-accent) 30%, var(--rim));
+  background: var(--vessel-high);
+}
+
+.personaSelected {
+  border-color: var(--persona-accent);
+  background: var(--vessel-high);
+}
+
+.personaName {
+  color: var(--persona-accent) !important;
+}
+
+.personaTagline {
+  font: var(--fs-quote);
+  font-style: italic;
+  color: var(--bone);
+  max-width: 24ch;
+}
+
+.personaPunishes {
+  width: 100%;
+  padding-top: var(--s-4);
+  border-top: 1px solid var(--rim);
+  display: grid;
+  gap: var(--s-2);
+}
+
+.punishesLabel {
+  color: color-mix(in oklch, var(--verdict-incorrect) 70%, transparent) !important;
+}
+
+.punishesBody {
+  font: var(--fs-small);
+  color: var(--ash);
+}
+
+.weights {
+  display: grid;
+  gap: var(--s-2);
+  width: 100%;
+  padding-top: var(--s-4);
+  border-top: 1px solid var(--rim);
+}
+
+.weightRow {
+  display: grid;
+  grid-template-columns: 1fr 48px;
+  gap: var(--s-3);
+  align-items: center;
+}
+
+.weightTrack {
+  height: 4px;
+  border-radius: var(--r-full);
+  background: var(--rim);
+  overflow: hidden;
+}
+
+.weightFill {
+  height: 100%;
+  background: var(--persona-accent);
+  border-radius: var(--r-full);
+}
+
+/* ── plan ────────────────────────────────────────────────────────────── */
+
+.areas {
+  display: grid;
+  gap: var(--s-3);
+}
+
+.area {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) auto;
+  gap: var(--s-4);
+  align-items: start;
+  padding: var(--s-5);
+  border: 1px solid var(--rim);
+  border-radius: var(--r-panel);
+  background: var(--vessel);
+  text-align: left;
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    opacity var(--dur-fast) var(--ease-out);
+}
+
+.area:hover {
+  border-color: var(--rim-lit);
+}
+
+.areaDropped {
+  opacity: 0.45;
+}
+
+.checkbox {
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
+  border-radius: var(--r-tag);
+  border: 1px solid var(--rim-lit);
+  display: grid;
+  place-items: center;
+  color: var(--void);
+  background: transparent;
+}
+
+.checkboxOn {
+  background: var(--heat-hot);
+  border-color: var(--heat-hot);
+}
+
+.areaName {
+  font: var(--fs-h3);
+  letter-spacing: var(--tr-h3);
+  color: var(--bone);
+}
+
+.areaWhy {
+  font: var(--fs-small);
+  color: var(--ash);
+  margin-top: var(--s-2);
+}
+
+@media (max-width: 899px) {
+  .modes,
+  .personaGrid {
+    grid-template-columns: 1fr;
+  }
+}
