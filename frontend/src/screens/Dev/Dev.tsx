@@ -6,6 +6,7 @@ import * as api from '../../lib/api'
 import { PERSONA_FALLBACK_NAME, PERSONA_IDS, type PersonaId } from '../../lib/persona'
 import type { LiveState } from '../../lib/protocol'
 import { useAuth } from '../../store/auth'
+import { AudioSpike } from './AudioSpike'
 
 import {
   Button,
@@ -264,6 +265,11 @@ export default function Dev() {
           </Button>
         </div>
         {probe && <pre className={s.probe}>{probe}</pre>}
+      </section>
+
+      <section className={s.section}>
+        <h2 className={s.sectionHead}>Audio pipeline</h2>
+        <AudioSpike />
       </section>
 
       <section className={s.section}>

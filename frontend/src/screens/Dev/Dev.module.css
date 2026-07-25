@@ -70,6 +70,56 @@
   line-height: 1;
 }
 
+.spikeStats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
+  gap: var(--s-3);
+  flex: 1;
+  min-width: 300px;
+}
+
+.stat {
+  display: grid;
+  gap: var(--s-1);
+  padding: var(--s-3);
+  border: 1px solid var(--rim);
+  border-radius: var(--r-control);
+  background: var(--vessel-high);
+}
+
+.stat[data-tone='good'] {
+  border-color: color-mix(in oklch, var(--verdict-validated) 30%, var(--rim));
+}
+
+.stat[data-tone='bad'] {
+  border-color: color-mix(in oklch, var(--verdict-incorrect) 45%, var(--rim));
+}
+
+.statValue {
+  font: var(--fs-metric);
+  font-size: 20px;
+  letter-spacing: var(--tr-metric);
+  color: var(--bone);
+  font-variant-numeric: tabular-nums;
+}
+
+.spikeError {
+  margin: var(--s-4) 0 0;
+  padding: var(--s-3) var(--s-4);
+  border: 1px solid color-mix(in oklch, var(--t-assay) 40%, var(--rim));
+  border-radius: var(--r-control);
+  color: var(--t-assay);
+  font: var(--fs-small);
+}
+
+.spikeTranscript {
+  margin-top: var(--s-4);
+  display: grid;
+  gap: var(--s-3);
+  font: var(--fs-quote);
+  color: var(--bone);
+}
+
 .probe {
   margin: 0;
   padding: var(--s-4);
