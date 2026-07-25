@@ -10,7 +10,9 @@ import {
   Popover,
   StatusLabel,
 } from '../../components/primitives'
+import { HeatmapReveal } from '../../components/verdict'
 import { BAND_NAMES, currentBand, setBand, type Band } from '../../lib/band'
+import { DEMO_SPANS, DEMO_TRANSCRIPT } from '../../lib/fixtures'
 import { VERDICTS, VERDICT_DEFINITION, VERDICT_NAME, verdictColor } from '../../lib/verdict'
 import { pushToast } from '../../store/toasts'
 import s from './Dev.module.css'
@@ -59,6 +61,7 @@ const SPECIMEN: { token: string; label: string; sample: string }[] = [
 export default function Dev() {
   const [band, setLocalBand] = useState<Band>(currentBand)
   const [highContrast, setHighContrast] = useState(false)
+  const [revealNonce, setRevealNonce] = useState(0)
 
   function pick(next: Band) {
     setBand(next)
@@ -131,6 +134,25 @@ export default function Dev() {
             </div>
           ))}
         </div>
+      </section>
+
+      <section className={s.section}>
+        <h2 className={s.sectionHead}>Heatmap reveal</h2>
+        <div className={s.controls}>
+          <Button variant="secondary" onClick={() => setRevealNonce((n) => n + 1)}>
+            Replay reveal
+          </Button>
+          <Label tone="quiet">hover or tab a span for its explanation · esc closes</Label>
+        </div>
+        <Panel flush>
+          <div style={{ padding: 'var(--s-5)' }}>
+            <HeatmapReveal
+              text={DEMO_TRANSCRIPT}
+              ranges={DEMO_SPANS}
+              revealKey={revealNonce}
+            />
+          </div>
+        </Panel>
       </section>
 
       <section className={s.section}>

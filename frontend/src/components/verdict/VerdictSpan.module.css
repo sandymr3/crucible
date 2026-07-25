@@ -1,0 +1,124 @@
+/**
+ * A graded stretch of the candidate's own words (design PRD §3.5).
+ *
+ * A 12% tint fill with a 2px rule at full strength. Never a full-strength fill:
+ * at 21px the transcript would become a highlighter-pen mess and stop being
+ * readable, which defeats the point of putting it in a serif.
+ *
+ * ── Why the rule is a background layer and not a border ──────────────────
+ *
+ * box-decoration-break: clone is not optional. Without it a span that wraps to
+ * a second line renders with a broken box and reads as a bug — and the
+ * transcript column is only 68ch, so spans wrap constantly.
+ *
+ * That rules out the obvious way to draw the rule left-to-right. An absolutely
+ * positioned pseudo-element does NOT clone across line fragments, so a scaled
+ * ::after would draw on one fragment and leave the rest bare. Both the fill and
+ * the rule are therefore background layers on the element itself: they clone
+ * correctly, and background-size animates the draw.
+ */
+
+/* Registered so they interpolate. An unregistered custom property is an opaque
+   token stream and would snap between keyframes rather than travel. */
+@property --span-draw {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: 100%;
+}
+@property --span-fill {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: 12;
+}
+
+.span {
+  --verdict-color: var(--ash);
+
+  padding: 1px 3px 0;
+  /* --r-tag is the token for verdict spans; the flat bottom keeps the rule
+     reading as an underline rather than a pill. */
+  border-radius: var(--r-tag) var(--r-tag) 0 0;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+
+  background-image:
+    /* layer 1 — the 2px rule, drawn left to right */
+    linear-gradient(var(--verdict-color), var(--verdict-color)),
+    /* layer 2 — the tint fill */
+    linear-gradient(
+      color-mix(in oklch, var(--verdict-color) calc(var(--span-fill) * 1%), transparent),
+      color-mix(in oklch, var(--verdict-color) calc(var(--span-fill) * 1%), transparent)
+    );
+  background-repeat: no-repeat;
+  background-position:
+    left bottom,
+    left top;
+  background-size:
+    var(--span-draw) 2px,
+    100% 100%;
+
+  color: var(--bone);
+  cursor: help;
+  transition: --span-fill var(--dur-fast) var(--ease-out);
+}
+
+.span:hover,
+.span:focus-visible {
+  --span-fill: 22;
+}
+
+/* Colour is never the only signal (§12). The glyph sits after the text in a
+   superscript register so it does not interrupt reading. */
+.glyph {
+  font-family: var(--font-mono);
+  font-size: 0.62em;
+  font-weight: 700;
+  vertical-align: super;
+  margin-left: 2px;
+  color: var(--verdict-color);
+  user-select: none;
+}
+
+.span[data-verdict='validated'] {
+  --verdict-color: var(--verdict-validated);
+}
+.span[data-verdict='incomplete'] {
+  --verdict-color: var(--verdict-incomplete);
+}
+.span[data-verdict='unsupported'] {
+  --verdict-color: var(--verdict-unsupported);
+}
+.span[data-verdict='incorrect'] {
+  --verdict-color: var(--verdict-incorrect);
+}
+
+/**
+ * The reveal (§7.2.1, §8.5). The tint fades in while the rule draws left to
+ * right over 320ms, staggered 160ms between spans.
+ *
+ * The container clears data-reveal once the whole sequence has finished, so the
+ * animation's filled value stops overriding the hover state above.
+ */
+.span[data-reveal='true'] {
+  animation: span-reveal 320ms var(--ease-out) both;
+  animation-delay: var(--span-delay, 0ms);
+}
+
+@keyframes span-reveal {
+  from {
+    --span-draw: 0%;
+    --span-fill: 0;
+  }
+  to {
+    --span-draw: 100%;
+    --span-fill: 12;
+  }
+}
+
+/* Render the end state immediately; the finding still lands, it just does not
+   travel. */
+@media (prefers-reduced-motion: reduce) {
+  .span[data-reveal='true'] {
+    animation: none;
+  }
+}
