@@ -70,6 +70,51 @@
   line-height: 1;
 }
 
+.orbRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-8);
+  align-items: center;
+}
+
+.orbStage {
+  display: grid;
+  justify-items: center;
+  gap: var(--s-4);
+  padding: var(--s-6);
+  border: 1px solid var(--rim);
+  border-radius: var(--r-panel);
+  background: var(--vessel);
+}
+
+.orbGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(104px, 1fr));
+  gap: var(--s-3);
+  flex: 1;
+  min-width: 320px;
+}
+
+.orbCell {
+  display: grid;
+  justify-items: center;
+  gap: var(--s-2);
+  padding: var(--s-3);
+  border: 1px solid var(--rim);
+  border-radius: var(--r-control);
+  background: var(--vessel);
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+
+.orbCell:hover {
+  border-color: var(--rim-lit);
+}
+
+.orbCell[aria-pressed='true'] {
+  border-color: var(--rim-lit);
+  background: var(--vessel-high);
+}
+
 .ramp {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));

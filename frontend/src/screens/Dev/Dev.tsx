@@ -1,5 +1,9 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Lightbulb, CornerDownLeft, Keyboard, Square } from 'lucide-react'
+
+import { Orb, useAmplitude } from '../../components/orb'
+import { PERSONA_FALLBACK_NAME, PERSONA_IDS, type PersonaId } from '../../lib/persona'
+import type { LiveState } from '../../lib/protocol'
 
 import {
   Button,
@@ -33,6 +37,16 @@ import s from './Dev.module.css'
  */
 
 const BANDS: Band[] = [1, 2, 3, 4, 5]
+
+const LIVE_STATES: LiveState[] = [
+  'CONNECTING',
+  'ASKING',
+  'LISTENING',
+  'CLOSING',
+  'EVALUATING',
+  'SETTLED',
+  'ERROR',
+]
 
 const RAMP = [
   '--t-quench',
@@ -68,6 +82,26 @@ export default function Dev() {
   const [band, setLocalBand] = useState<Band>(currentBand)
   const [highContrast, setHighContrast] = useState(false)
   const [revealNonce, setRevealNonce] = useState(0)
+  const [orbState, setOrbState] = useState<LiveState>('LISTENING')
+  const [persona, setPersona] = useState<PersonaId>('tech_lead')
+  const [speaking, setSpeaking] = useState(false)
+  const amplitude = useAmplitude()
+
+  // Stands in for the audio pipeline until it exists. Shaped like speech —
+  // syllables inside phrases, with pauses — rather than noise, because a
+  // random walk hides exactly the responsiveness this is meant to prove.
+  const { push } = amplitude
+  useEffect(() => {
+    if (!speaking) return
+    let t = 0
+    const id = setInterval(() => {
+      t += 0.02
+      const syllable = Math.max(0, Math.sin(t * Math.PI * 2 * 3.5))
+      const inPhrase = Math.sin(t * Math.PI * 2 * 0.22) > -0.4 ? 1 : 0
+      push(0.05 + syllable * inPhrase * 0.18 * (0.7 + Math.random() * 0.6))
+    }, 20)
+    return () => clearInterval(id)
+  }, [speaking, push])
 
   // The byte→character conversion, exercised through the real component. Every
   // span in this fixture sits after at least one multi-byte character, so a
@@ -147,6 +181,51 @@ export default function Dev() {
               <div className={s.swatchName}>{token}</div>
             </div>
           ))}
+        </div>
+      </section>
+
+      <section className={s.section}>
+        <h2 className={s.sectionHead}>Orb</h2>
+        <div className={s.controls}>
+          {PERSONA_IDS.map((p) => (
+            <button
+              key={p}
+              type="button"
+              onClick={() => setPersona(p)}
+              className={`${s.bandBtn} ${p === persona ? s.bandBtnOn : ''}`}
+              aria-pressed={p === persona}
+            >
+              {PERSONA_FALLBACK_NAME[p].replace('The ', '')}
+            </button>
+          ))}
+          <Button
+            variant={speaking ? 'primary' : 'secondary'}
+            onClick={() => setSpeaking((v) => !v)}
+          >
+            {speaking ? 'Stop audio' : 'Simulate speech'}
+          </Button>
+        </div>
+
+        <div className={s.orbRow}>
+          <div className={s.orbStage}>
+            <Orb ref={amplitude.ref} state={orbState} persona={persona} size={132} />
+            <Label tone="quiet">{orbState} · driven</Label>
+          </div>
+
+          <div className={s.orbGrid}>
+            {LIVE_STATES.map((state) => (
+              <button
+                key={state}
+                type="button"
+                className={s.orbCell}
+                onClick={() => setOrbState(state)}
+                aria-pressed={state === orbState}
+              >
+                <Orb state={state} persona={persona} size={56} />
+                <Label tone={state === orbState ? 'loud' : 'quiet'}>{state}</Label>
+              </button>
+            ))}
+          </div>
         </div>
       </section>
 

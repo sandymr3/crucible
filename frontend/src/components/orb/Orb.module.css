@@ -1,0 +1,142 @@
+/**
+ * The orb (design PRD §8.3).
+ *
+ * The visual anchor of the product and the thing that must never look dead. A
+ * frozen orb reads as a crashed app, so even at rest it breathes.
+ *
+ * SVG, not canvas. It is three circles and a filter; canvas would cost a render
+ * loop competing with the audio worklet for frames — and the worklet is the one
+ * that cannot afford to miss any.
+ *
+ * Amplitude arrives per audio chunk and is written straight onto --orb-energy
+ * as a style property, never through React state. Re-rendering a component tree
+ * fifty times a second to move one number is exactly the wrong shape.
+ */
+
+@property --orb-energy {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0;
+}
+
+.orb {
+  --orb-accent: var(--persona-tech-lead);
+
+  display: block;
+  position: relative;
+  flex: none;
+}
+
+.svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* SVG geometry needs an explicit box for percentage transform-origins to mean
+   what they say. */
+.core,
+.rings,
+.ring {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* Scale maps 1.0 -> 1.09 across the energy range. */
+.core {
+  transform: scale(calc(1 + var(--orb-energy) * 0.09));
+  transition: opacity var(--dur-base) var(--ease-out);
+}
+
+/* Ring opacities are 25 / 15 / 8 percent at rest, multiplied up to 2.6x at
+   full energy. The glow follows amplitude to 22px. */
+.ring {
+  fill: none;
+  stroke: var(--orb-accent);
+  stroke-width: 1;
+  opacity: calc(var(--ring-base) * (1 + var(--orb-energy) * 1.6));
+}
+
+.ring1 {
+  --ring-base: 0.25;
+}
+.ring2 {
+  --ring-base: 0.15;
+}
+.ring3 {
+  --ring-base: 0.08;
+}
+
+.glow {
+  filter: drop-shadow(0 0 calc(var(--orb-energy) * 22px) var(--orb-accent));
+}
+
+/* ── state signatures (§8.4) ─────────────────────────────────────────────
+   Every state must be identifiable from across a room. */
+
+/* Idle breathing. Applied to the wrapper so it composes with the core's
+   amplitude scale instead of fighting it for the same transform. */
+.orb[data-state='LISTENING'] .svg,
+.orb[data-state='SETTLED'] .svg {
+  animation: breathe 3.6s var(--ease-in-out) infinite;
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    transform: scale(0.98);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+}
+
+/* Connecting: no persona yet, and nothing to be energetic about. */
+.orb[data-state='CONNECTING'] {
+  --orb-accent: var(--dust);
+}
+
+.orb[data-state='CONNECTING'] .svg {
+  animation: breathe 2.4s var(--ease-in-out) infinite;
+}
+
+/* Evaluating: the rings turn while work happens, and the core dims to 60% so
+   the movement reads as attention elsewhere rather than as speech. */
+.orb[data-state='EVALUATING'] {
+  --orb-accent: var(--state-thinking);
+}
+
+.orb[data-state='EVALUATING'] .core {
+  opacity: 0.6;
+}
+
+.orb[data-state='EVALUATING'] .rings {
+  animation: revolve 6.6s linear infinite;
+}
+
+@keyframes revolve {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.orb[data-state='ERROR'] {
+  --orb-accent: var(--t-assay);
+}
+
+.orb[data-state='ERROR'] .core {
+  opacity: 0.5;
+}
+
+/**
+ * Reduced motion removes the loops but NOT the amplitude response: that one is
+ * driven by real sound rather than by a timer, and it is the signal that the
+ * system is alive.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .orb .svg,
+  .orb .rings {
+    animation: none;
+  }
+}
