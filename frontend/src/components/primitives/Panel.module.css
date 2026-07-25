@@ -1,0 +1,74 @@
+/**
+ * Panels (design PRD §9.2).
+ *
+ * Every panel in the product uses this. The repetition IS the point — the
+ * uppercase mono header appears dozens of times and is what makes the screens
+ * read as one instrument rather than a set of pages.
+ *
+ * Borders do the work; shadows barely exist. On a near-black base a drop shadow
+ * is close to invisible and mostly produces grey haze, so panels are separated
+ * by a 1px hairline and a surface-tone step. No backdrop-filter anywhere: it is
+ * the strongest current AI-interface tell, and it makes text unreadable over a
+ * moving background regardless.
+ */
+
+.panel {
+  background: var(--vessel);
+  border: 1px solid var(--rim);
+  border-radius: var(--r-panel);
+  padding: var(--s-5);
+  min-height: 0; /* so a grid child can actually shrink and scroll */
+}
+
+/* Content reaches the edges — for panels wrapping their own scroll region. */
+.panel[data-flush='true'] {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.panel[data-flush='true'] .header {
+  padding: var(--s-5) var(--s-5) var(--s-3);
+  margin-bottom: 0;
+}
+
+.panel[data-scroll='true'] {
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-4);
+  font: var(--fs-label);
+  letter-spacing: var(--tr-label);
+  text-transform: uppercase;
+  color: var(--ash);
+  padding-bottom: var(--s-3);
+  margin-bottom: var(--s-4);
+  border-bottom: 1px solid var(--rim);
+}
+
+/* Right-hand slot: turn counters, timers, counts. */
+.aside {
+  color: var(--dust);
+  font: var(--fs-mono-sm);
+  letter-spacing: var(--tr-mono-sm);
+  text-transform: none;
+  flex: none;
+}
+
+.body {
+  min-height: 0;
+}
+
+.panel[data-scroll='true'] .body {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  flex: 1;
+}
+
+.panel[data-flush='true'] .body {
+  padding: 0 var(--s-5) var(--s-5);
+}

@@ -1,0 +1,24 @@
+/**
+ * The transcript surface that carries graded spans.
+ *
+ * Deliberately motionless. During the reveal ONLY the spans move — the
+ * transcript's position and opacity hold still, and that stillness is what
+ * makes the moment read as an instrument taking a reading rather than a page
+ * transition.
+ */
+
+.surface {
+  position: relative;
+  font: var(--fs-transcript);
+  letter-spacing: var(--tr-transcript);
+  color: var(--bone);
+  max-width: 68ch;
+}
+
+.popoverLayer {
+  position: absolute;
+  z-index: 20;
+  /* Anchored by measurement, so it must not intercept the pointer on its way
+     to the span underneath. */
+  pointer-events: none;
+}

@@ -1,0 +1,73 @@
+/**
+ * The --fs-label treatment (design PRD §5.3).
+ *
+ * 11px Martian Mono, uppercase, 0.14em tracking, --ash. This is the connective
+ * tissue of the whole interface: every panel header, every status row, every
+ * small caption. It appears dozens of times, and its consistency is what makes
+ * the product read as one instrument.
+ */
+
+.label {
+  display: inline-block;
+  font: var(--fs-label);
+  letter-spacing: var(--tr-label);
+  text-transform: uppercase;
+  color: var(--ash);
+}
+
+/* Quieter register. --dust is below AA for body text, so it is only ever used
+   at this size for non-essential labels — never for anything a user must
+   read (§12). */
+.label[data-tone='quiet'] {
+  color: var(--dust);
+}
+
+.label[data-tone='loud'] {
+  color: var(--bone);
+}
+
+/* Inherits a caller-set colour, e.g. a persona accent or a verdict. */
+.label[data-tone='accent'] {
+  color: inherit;
+}
+
+/**
+ * Status row indicator: a coloured dot plus a label. The dot pulses only while
+ * the microphone is actually hot — the pulse means "we are listening", so it
+ * must not run in any other state.
+ */
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--r-full);
+  background: currentColor;
+  flex: none;
+}
+
+.dot[data-pulse='true'] {
+  animation: pulse 1.4s var(--ease-in-out) infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 currentColor;
+  }
+  50% {
+    opacity: 0.55;
+    box-shadow: 0 0 0 4px transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dot[data-pulse='true'] {
+    animation: none;
+  }
+}

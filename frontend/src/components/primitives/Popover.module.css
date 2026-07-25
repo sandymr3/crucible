@@ -1,0 +1,48 @@
+/**
+ * The verdict popover (design PRD §9.4).
+ *
+ * One of only two places a shadow is allowed, because it genuinely floats above
+ * the transcript. Everywhere else borders do the work.
+ */
+
+.popover {
+  --popover-accent: var(--ash);
+
+  max-width: 280px;
+  /* 14px is specified for this component and is deliberately off the 4px
+     spacing scale — §9.4 overrides §6.1 here. */
+  padding: 14px;
+  background: var(--vessel-high);
+  border: 1px solid var(--rim);
+  border-radius: var(--r-control);
+  box-shadow: var(--shadow-float);
+  display: grid;
+  gap: var(--s-2);
+  text-align: left;
+}
+
+.concept {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  font: var(--fs-label);
+  letter-spacing: var(--tr-label);
+  text-transform: uppercase;
+  color: var(--popover-accent);
+}
+
+.glyph {
+  font-weight: 700;
+}
+
+.explanation {
+  font: var(--fs-small);
+  color: var(--bone);
+}
+
+.correction {
+  font: var(--fs-small);
+  color: var(--ash);
+  padding-top: var(--s-2);
+  border-top: 1px solid var(--rim);
+}

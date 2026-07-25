@@ -1,0 +1,255 @@
+/**
+ * Every custom property in Crucible. Single source of truth.
+ *
+ * The one rule that keeps this honest: NO COMPONENT FILE CONTAINS A HEX
+ * LITERAL. Every colour is var(--token). When the ramp is retuned at 2am it is
+ * retuned here, once.
+ *
+ * The concept (design PRD §1): the interface is a false-colour thermal image of
+ * a conversation. Cool where things are settled, hot where they are being
+ * tested. Difficulty band IS temperature. Every colour derives from that; if
+ * the concept breaks, the palette becomes arbitrary.
+ *
+ * The 90/10 rule (§2.3): ninety percent of pixels are near-monochrome. Ten
+ * percent carry all the colour, and every one of them means something. Colour
+ * never appears behind reading text.
+ */
+
+/**
+ * Registering the ambient properties makes them genuinely interpolatable.
+ *
+ * An unregistered custom property is a token stream, so it can only ever flip
+ * between values — the thermal shift would snap rather than travel. Registering
+ * them as <color> and <number> lets the transition on :root below animate them
+ * directly, and every gradient and font axis that reads them follows
+ * continuously. This is why the blooms carry no `transition: background` of
+ * their own: one mechanism, not two fighting.
+ */
+@property --heat-cold {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #17e0c4;
+}
+@property --heat-hot {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #2e9bf0;
+}
+@property --heat-alpha {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0.16;
+}
+@property --band-width {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 112;
+}
+
+:root {
+  /* ── structure — the 90% ──────────────────────────────────────────────
+     A blue-black, not a neutral black. Neutral black next to warm accents
+     reads muddy; this keeps the ember tones clean. Text is never pure white:
+     #FFF on near-black vibrates on a projector.                          */
+  --void: #07080d; /* page base, behind everything            */
+  --vessel: #0e1119; /* panel surface — cards, rails, columns   */
+  --vessel-high: #151926; /* raised surface — popovers, active rows  */
+  --rim: #1e2334; /* hairline borders, dividers, chart grid  */
+  --rim-lit: #2c3348; /* hover borders, focus rings (unfocused)  */
+  --bone: #eceef5; /* primary text, headings, transcript      */
+  --ash: #9aa0b4; /* secondary text, labels, captions        */
+  --dust: #5d6479; /* tertiary, disabled, placeholder         */
+
+  /* ── the thermal ramp — the 10% ───────────────────────────────────────
+     Six stops, cold to hot. One scale doing four jobs: verdict spans,
+     difficulty bands, the ambient field, and data marks. That is what makes
+     the system feel coherent rather than assembled.                      */
+  --t-quench: #17e0c4; /* aquamarine — coldest                   */
+  --t-cool: #2e9bf0; /* signal blue                            */
+  --t-temper: #7be05c; /* lit green                              */
+  --t-warm: #f2b33d; /* amber                                  */
+  --t-ember: #ff6b35; /* ember orange                           */
+  --t-assay: #f0417b; /* crimson-rose — hottest, used sparingly */
+
+  /* The white-hot moment. Band promotion, mastery unlock, session complete.
+     Nothing else. Using this often destroys it.                          */
+  --t-flare: #ffe9d2;
+
+  /* ── semantic aliases ─────────────────────────────────────────────────
+     Components reference these, never a raw ramp token.                  */
+  --verdict-validated: var(--t-temper);
+  --verdict-incomplete: var(--t-warm);
+  --verdict-unsupported: var(--t-cool);
+  --verdict-incorrect: var(--t-assay);
+
+  --action-primary: var(--t-ember); /* exactly one per screen */
+  --action-danger: var(--t-assay);
+  --state-live: var(--t-temper); /* the "listening" pulse  */
+  --state-thinking: var(--t-warm);
+
+  /* ── persona accents (§3.3) ───────────────────────────────────────────
+     Tints the orb, the name, and the card border. Nothing else.          */
+  --persona-tech-lead: var(--t-quench); /* cold, precise, unsentimental */
+  --persona-architect: var(--t-cool); /* measured, structural         */
+  --persona-pm: var(--t-warm); /* warmer register, more human  */
+
+  /* ── ambient, overridden by [data-band] ───────────────────────────────
+     These three properties ARE the signature. The room gets hotter as you
+     get pushed harder.                                                   */
+  --heat-cold: var(--t-quench);
+  --heat-hot: var(--t-cool);
+  --heat-alpha: 0.16;
+  --band-width: 112; /* the Anybody wdth axis */
+
+  /* ── shape (§6.2) ─────────────────────────────────────────────────────
+     Nothing gets a radius larger than 14px. rounded-3xl is a tell.       */
+  --r-panel: 14px; /* rails, columns, cards, modals    */
+  --r-control: 8px; /* buttons, inputs, chips, badges   */
+  --r-tag: 4px; /* verdict spans, small tags        */
+  --r-full: 999px; /* the orb, status dots, pace dial  */
+
+  /* ── space (§6.1) — 4px base, no arbitrary values ─────────────────── */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 20px;
+  --s-6: 24px;
+  --s-8: 32px;
+  --s-10: 40px;
+  --s-14: 56px;
+  --s-18: 72px;
+  --s-24: 96px;
+  --s-32: 128px;
+
+  /* Section rhythm on the home page. */
+  --rhythm-section: var(--s-32);
+  --page-max: 1200px;
+  --page-gutter: var(--s-18);
+
+  /* ── type scale (§5.3) — 1.25 ratio, two display jumps ────────────────
+     Held as `font` shorthands so a component writes
+       font: var(--fs-label); letter-spacing: var(--tr-label);
+     and never restates a size, weight, or family.                        */
+  --fs-display: 800 76px/0.94 var(--font-display);
+  --tr-display: -0.03em;
+  --fs-h1: 700 44px/1.08 var(--font-display);
+  --tr-h1: -0.02em;
+  --fs-h2: 600 30px/1.18 var(--font-display);
+  --tr-h2: -0.015em;
+  --fs-h3: 600 21px/1.3 var(--font-ui);
+  --tr-h3: -0.005em;
+  --fs-body: 400 16px/1.62 var(--font-ui);
+  --tr-body: 0;
+  --fs-small: 400 14px/1.55 var(--font-ui);
+  --tr-small: 0;
+
+  /* The transcript. Do not shrink this — it is the centre of the product. */
+  --fs-transcript: 400 21px/1.78 var(--font-read);
+  --tr-transcript: 0;
+  --fs-quote: 400 18px/1.7 var(--font-read);
+  --tr-quote: 0;
+
+  --fs-metric: 500 32px/1 var(--font-mono);
+  --tr-metric: -0.02em;
+
+  /* The connective tissue of the whole interface. Every panel header —
+     INTERVIEW SESSION, LIVE TRANSCRIPT, EVALUATION — is this treatment. It
+     appears dozens of times and it is what makes the screens read as one
+     instrument.                                                          */
+  --fs-label: 500 11px/1.2 var(--font-mono);
+  --tr-label: 0.14em;
+  --fs-mono-sm: 400 12px/1.4 var(--font-mono);
+  --tr-mono-sm: 0.04em;
+
+  /* ── motion (§6.4) ────────────────────────────────────────────────────
+     Motion is diegetic. If you cannot name the event that caused it,
+     delete it.                                                           */
+  --ease-out: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-fast: 140ms; /* hover, focus, press              */
+  --dur-base: 260ms; /* panel and content transitions    */
+  --dur-slow: 600ms; /* the heatmap reveal               */
+  --dur-heat: 1800ms; /* the band-driven thermal shift    */
+
+  /* ── elevation (§6.3) ─────────────────────────────────────────────────
+     Borders do the work; shadows barely exist. On a near-black base drop
+     shadows are close to invisible and mostly produce grey haze. This is
+     the one exception: popovers and toasts, which must float.
+     NO glassmorphism — backdrop-filter is the strongest current AI tell.  */
+  --shadow-float:
+    0 16px 48px -12px rgb(0 0 0 / 0.7), 0 0 0 1px var(--rim);
+}
+
+/**
+ * The thermal shift itself. 1800ms for hue and intensity, 900ms for the width
+ * axis — the same event on two channels, the second landing first.
+ */
+:root {
+  transition:
+    --heat-cold var(--dur-heat) var(--ease-out),
+    --heat-hot var(--dur-heat) var(--ease-out),
+    --heat-alpha var(--dur-heat) var(--ease-out),
+    --band-width 900ms var(--ease-out);
+}
+
+/**
+ * The band transition is information, not decoration, so reduced motion
+ * shortens it rather than removing it (§4.5).
+ */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    transition-duration: 400ms;
+  }
+}
+
+/**
+ * The signature (§1.1): the room gets hotter as you get pushed harder.
+ *
+ * Set document.documentElement.dataset.band on every `band` WebSocket frame.
+ * That is the entire implementation. Intensity rises with heat too, so band 5
+ * feels perceptibly closer rather than only differently hued.
+ *
+ * Band 1 is defined for completeness but is unreachable: the backend's ladder
+ * clamps to 2..5 (internal/difficulty MinBand), because demoting an adult with
+ * a real resume to definitional questions is demoralising.
+ */
+[data-band='1'] {
+  --heat-cold: #17e0c4;
+  --heat-hot: #2e9bf0;
+  --heat-alpha: 0.14;
+  --band-width: 88;
+}
+[data-band='2'] {
+  --heat-cold: #17e0c4;
+  --heat-hot: #7be05c;
+  --heat-alpha: 0.16;
+  --band-width: 100;
+}
+[data-band='3'] {
+  --heat-cold: #2e9bf0;
+  --heat-hot: #f2b33d;
+  --heat-alpha: 0.19;
+  --band-width: 112;
+}
+[data-band='4'] {
+  --heat-cold: #7be05c;
+  --heat-hot: #ff6b35;
+  --heat-alpha: 0.23;
+  --band-width: 124;
+}
+[data-band='5'] {
+  --heat-cold: #f2b33d;
+  --heat-hot: #f0417b;
+  --heat-alpha: 0.28;
+  --band-width: 138;
+}
+
+/**
+ * Projectors crush blacks, wash out low-contrast detail, and shift colours
+ * warm. Set this before presenting in a bright room (§12).
+ */
+[data-contrast='high'] {
+  --vessel: #131722;
+  --ash: #a8aec2;
+}

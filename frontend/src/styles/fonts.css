@@ -1,0 +1,50 @@
+/**
+ * The four faces and their jobs (design PRD §5.1).
+ *
+ * Inter is deliberately absent. It is the most common typeface in
+ * AI-generated interfaces and reads as a default rather than a decision.
+ *
+ *   Anybody          wordmark, screen titles, band indicator, large numerals.
+ *                    Variable WIDTH axis (50-150) — bound to the difficulty
+ *                    band in §5.2, which is why the wdth entrypoint is imported
+ *                    rather than wght.
+ *   Instrument Sans  all UI: buttons, labels, nav, body copy.
+ *   Literata         the live transcript and quoted answers. NOTHING else.
+ *                    A serif makes the candidate's own speech look like a
+ *                    document of record, which is the point.
+ *   Martian Mono     metrics, timers, WPM, timestamps, band numerals, counts.
+ *                    Tabular figures, so numbers do not jitter as they tick.
+ *
+ * The variable packages carry no latin-only entrypoint, but their @font-face
+ * blocks are split by unicode-range, so a browser rendering latin text fetches
+ * only the latin file. The static faces use the latin-* entrypoints directly.
+ */
+
+/* Anybody — wdth carries both axes: font-weight 100..900, font-stretch 50%..150% */
+@import '@fontsource-variable/anybody/wdth.css';
+
+@import '@fontsource/instrument-sans/latin-400.css';
+@import '@fontsource/instrument-sans/latin-500.css';
+@import '@fontsource/instrument-sans/latin-600.css';
+@import '@fontsource/instrument-sans/latin-700.css';
+
+@import '@fontsource-variable/literata/standard.css';
+@import '@fontsource-variable/literata/standard-italic.css';
+
+@import '@fontsource/martian-mono/latin-400.css';
+@import '@fontsource/martian-mono/latin-500.css';
+
+:root {
+  --font-display: 'Anybody Variable', system-ui, sans-serif;
+  --font-ui: 'Instrument Sans', system-ui, sans-serif;
+  --font-read: 'Literata Variable', Georgia, serif;
+  --font-mono: 'Martian Mono', ui-monospace, monospace;
+}
+
+/* Numbers must not reflow as they tick. */
+[class*='metric'],
+[class*='mono'],
+time,
+output {
+  font-variant-numeric: tabular-nums;
+}

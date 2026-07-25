@@ -1,0 +1,90 @@
+/* Reset and document defaults. Design tokens live in tokens.css. */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  color-scheme: dark;
+  background: var(--void);
+}
+
+body {
+  min-height: 100dvh;
+  background: var(--void);
+  color: var(--bone);
+  font: var(--fs-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Visible keyboard focus is a hard requirement, not a nicety (§12).
+   Deliberately no border-radius here: that property would reshape the element
+   itself on focus rather than the ring. Outlines already follow the element's
+   own corners. */
+:focus-visible {
+  outline: 2px solid var(--t-quench);
+  outline-offset: 2px;
+}
+
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+input,
+button,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  overflow-wrap: break-word;
+}
+
+button {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+}
+
+#root {
+  isolation: isolate;
+}
+
+/* Available to a screen reader, invisible on screen. Carries the verdict name
+   alongside its glyph so the heatmap survives without colour or shape. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}

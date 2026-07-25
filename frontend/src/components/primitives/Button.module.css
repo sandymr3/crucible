@@ -1,0 +1,131 @@
+/**
+ * Buttons (design PRD §9.1).
+ *
+ * Exactly one primary button per screen. That is a hard rule, not a
+ * preference — a screen with two primary actions has no primary action, and
+ * more than one ember fill breaks the 90/10 colour discipline.
+ *
+ * Focus rings come from the global :focus-visible in base.css.
+ */
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-2);
+  border-radius: var(--r-control);
+  border: 1px solid transparent;
+  font: var(--fs-small);
+  font-weight: 600;
+  white-space: nowrap;
+  transition:
+    background var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
+}
+
+.button:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.button:disabled {
+  color: var(--dust);
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ── sizes ───────────────────────────────────────────────────────────── */
+
+.button[data-size='hero'] {
+  height: 52px;
+  padding: 0 var(--s-6);
+  font: var(--fs-body);
+  font-weight: 600;
+}
+
+.button[data-size='standard'] {
+  height: 44px;
+  padding: 0 var(--s-5);
+}
+
+.button[data-size='compact'] {
+  height: 36px;
+  padding: 0 var(--s-4);
+}
+
+/* ── variants ────────────────────────────────────────────────────────── */
+
+.button[data-variant='primary'] {
+  background: var(--action-primary);
+  color: var(--void);
+}
+
+.button[data-variant='primary']:hover:not(:disabled) {
+  background: color-mix(in oklch, var(--action-primary) 88%, var(--bone));
+}
+
+.button[data-variant='primary']:disabled {
+  background: var(--rim);
+  color: var(--dust);
+}
+
+.button[data-variant='secondary'] {
+  background: var(--vessel-high);
+  color: var(--bone);
+  border-color: var(--rim);
+}
+
+.button[data-variant='secondary']:hover:not(:disabled) {
+  border-color: var(--rim-lit);
+  background: color-mix(in oklch, var(--vessel-high) 80%, var(--bone));
+}
+
+.button[data-variant='ghost'] {
+  background: transparent;
+  color: var(--ash);
+}
+
+.button[data-variant='ghost']:hover:not(:disabled) {
+  color: var(--bone);
+}
+
+.button[data-variant='danger'] {
+  background: transparent;
+  color: var(--action-danger);
+  border-color: color-mix(in oklch, var(--action-danger) 40%, transparent);
+}
+
+.button[data-variant='danger']:hover:not(:disabled) {
+  border-color: var(--action-danger);
+  background: color-mix(in oklch, var(--action-danger) 10%, transparent);
+}
+
+/* ── full width ──────────────────────────────────────────────────────── */
+
+.button[data-block='true'] {
+  width: 100%;
+}
+
+/**
+ * The Live Room's control group: four buttons stacked and divided by hairlines
+ * rather than separated by gaps. The stacked-with-dividers treatment reads as
+ * an instrument panel; four floating buttons read as a web form.
+ */
+.group {
+  display: grid;
+  border: 1px solid var(--rim);
+  border-radius: var(--r-control);
+  overflow: hidden;
+}
+
+.group > .button {
+  border-radius: 0;
+  border: none;
+  border-bottom: 1px solid var(--rim);
+  justify-content: flex-start;
+}
+
+.group > .button:last-child {
+  border-bottom: none;
+}

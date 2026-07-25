@@ -1,0 +1,92 @@
+/**
+ * Toasts (design PRD §8.6).
+ *
+ * The band-change toast is the only consumer at present, and its copy comes
+ * straight from the frame's `message` field — the backend writes it as an
+ * explanation ("Difficulty raised — you've proven the fundamentals."), not as a
+ * log line.
+ *
+ * Deliberately silent. The AI is already talking; a notification chime over a
+ * voice interface is jarring and unprofessional.
+ */
+
+.host {
+  position: fixed;
+  top: var(--s-4);
+  right: var(--s-4);
+  z-index: 40;
+  display: grid;
+  gap: var(--s-2);
+  justify-items: end;
+  pointer-events: none;
+}
+
+.toast {
+  --toast-accent: var(--action-primary);
+
+  pointer-events: auto;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-3);
+  max-width: 340px;
+  padding: var(--s-3) var(--s-4);
+  background: var(--vessel-high);
+  border: 1px solid var(--rim);
+  border-left: 3px solid var(--toast-accent);
+  border-radius: var(--r-control);
+  box-shadow: var(--shadow-float);
+  color: var(--bone);
+  font: var(--fs-body);
+  animation: slide-in var(--dur-base) var(--ease-out) both;
+}
+
+/* 16px of travel, from the top-right. Enough to read as arrival, short enough
+   not to draw the eye away from the transcript. */
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translate3d(16px, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.leaving {
+  animation: fade-out var(--dur-base) var(--ease-out) both;
+}
+
+@keyframes fade-out {
+  to {
+    opacity: 0;
+    transform: translate3d(8px, 0, 0);
+  }
+}
+
+.title {
+  color: var(--toast-accent);
+  display: block;
+  margin-bottom: var(--s-1);
+}
+
+.dismiss {
+  flex: none;
+  margin-left: auto;
+  color: var(--dust);
+  line-height: 1;
+  padding: var(--s-1);
+  border-radius: var(--r-tag);
+  transition: color var(--dur-fast) var(--ease-out);
+}
+
+.dismiss:hover {
+  color: var(--bone);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast,
+  .leaving {
+    animation-duration: 1ms;
+  }
+}

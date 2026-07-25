@@ -1,0 +1,82 @@
+/**
+ * The band indicator (design PRD §5.2, §8.6).
+ *
+ * Two channels carry the same event. The thermal field shifts hue and closeness
+ * over 1800ms, and the numeral physically BROADENS along Anybody's variable
+ * width axis over 900ms — the faster one landing first, so the number has
+ * already changed shape by the time the room finishes warming.
+ */
+
+.indicator {
+  position: relative;
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--s-2);
+}
+
+/* `font` must be declared before font-variation-settings: the shorthand resets
+   it, so writing it afterwards silently discards the axis. */
+.numeral {
+  font-family: var(--font-display);
+  font-size: var(--band-size, 26px);
+  line-height: 1;
+  color: var(--bone);
+  font-variation-settings:
+    'wdth' var(--band-width),
+    'wght' 700;
+  font-variant-numeric: tabular-nums;
+  transition: color var(--dur-base) var(--ease-out);
+}
+
+/**
+ * The white-hot moment, at t=120. One sweep, 400ms, once.
+ *
+ * --t-flare is reserved for band promotion, mastery unlock and session
+ * complete. Using it more often destroys it.
+ */
+.flare {
+  position: absolute;
+  inset: -6px -10px;
+  border-radius: var(--r-control);
+  pointer-events: none;
+  background: linear-gradient(
+    100deg,
+    transparent 22%,
+    color-mix(in oklch, var(--t-flare) 55%, transparent) 50%,
+    transparent 78%
+  );
+  background-size: 240% 100%;
+  animation: flare-sweep 400ms var(--ease-out) 1 both;
+}
+
+@keyframes flare-sweep {
+  from {
+    background-position: 150% 0;
+    opacity: 0;
+  }
+  30% {
+    opacity: 1;
+  }
+  to {
+    background-position: -70% 0;
+    opacity: 0;
+  }
+}
+
+.flaring .numeral {
+  color: var(--t-flare);
+}
+
+/**
+ * The band change is INFORMATION, not decoration, so reduced motion keeps it
+ * and shortens it rather than removing it. The sweep is the one purely
+ * decorative part, so that goes.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .flare {
+    animation: none;
+  }
+  .numeral {
+    transition-duration: 100ms;
+  }
+}

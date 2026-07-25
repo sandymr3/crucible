@@ -1,0 +1,233 @@
+.page {
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: var(--s-10) var(--s-6) var(--s-24);
+  display: grid;
+  gap: var(--s-14);
+}
+
+.section {
+  display: grid;
+  gap: var(--s-5);
+}
+
+.sectionHead {
+  font: var(--fs-label);
+  letter-spacing: var(--tr-label);
+  text-transform: uppercase;
+  color: var(--ash);
+  padding-bottom: var(--s-3);
+  border-bottom: 1px solid var(--rim);
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  align-items: center;
+}
+
+.bandBtn {
+  min-width: 64px;
+  height: 44px;
+  padding: 0 var(--s-4);
+  border-radius: var(--r-control);
+  border: 1px solid var(--rim);
+  background: var(--vessel);
+  color: var(--ash);
+  font: var(--fs-label);
+  letter-spacing: var(--tr-label);
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+}
+
+.bandBtn:hover {
+  border-color: var(--rim-lit);
+  background: var(--vessel-high);
+  color: var(--bone);
+}
+
+.bandBtnOn {
+  border-color: var(--heat-hot);
+  color: var(--bone);
+  background: var(--vessel-high);
+}
+
+/* The width-axis move (§5.2): the band numeral physically broadens as the
+   difficulty rises. `font` must come first — the shorthand resets
+   font-variation-settings, so declaring it after is what makes the axis
+   survive. */
+.bandNumeral {
+  font: var(--fs-display);
+  font-family: var(--font-display);
+  font-variation-settings:
+    'wdth' var(--band-width),
+    'wght' 800;
+  letter-spacing: var(--tr-display);
+  color: var(--bone);
+  line-height: 1;
+}
+
+.spikeStats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
+  gap: var(--s-3);
+  flex: 1;
+  min-width: 300px;
+}
+
+.stat {
+  display: grid;
+  gap: var(--s-1);
+  padding: var(--s-3);
+  border: 1px solid var(--rim);
+  border-radius: var(--r-control);
+  background: var(--vessel-high);
+}
+
+.stat[data-tone='good'] {
+  border-color: color-mix(in oklch, var(--verdict-validated) 30%, var(--rim));
+}
+
+.stat[data-tone='bad'] {
+  border-color: color-mix(in oklch, var(--verdict-incorrect) 45%, var(--rim));
+}
+
+.statValue {
+  font: var(--fs-metric);
+  font-size: 20px;
+  letter-spacing: var(--tr-metric);
+  color: var(--bone);
+  font-variant-numeric: tabular-nums;
+}
+
+.spikeError {
+  margin: var(--s-4) 0 0;
+  padding: var(--s-3) var(--s-4);
+  border: 1px solid color-mix(in oklch, var(--t-assay) 40%, var(--rim));
+  border-radius: var(--r-control);
+  color: var(--t-assay);
+  font: var(--fs-small);
+}
+
+.spikeTranscript {
+  margin-top: var(--s-4);
+  display: grid;
+  gap: var(--s-3);
+  font: var(--fs-quote);
+  color: var(--bone);
+}
+
+.probe {
+  margin: 0;
+  padding: var(--s-4);
+  background: var(--vessel);
+  border: 1px solid var(--rim);
+  border-radius: var(--r-control);
+  font: var(--fs-mono-sm);
+  letter-spacing: var(--tr-mono-sm);
+  color: var(--ash);
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 320px;
+  overflow: auto;
+}
+
+.orbRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-8);
+  align-items: center;
+}
+
+.orbStage {
+  display: grid;
+  justify-items: center;
+  gap: var(--s-4);
+  padding: var(--s-6);
+  border: 1px solid var(--rim);
+  border-radius: var(--r-panel);
+  background: var(--vessel);
+}
+
+.orbGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(104px, 1fr));
+  gap: var(--s-3);
+  flex: 1;
+  min-width: 320px;
+}
+
+.orbCell {
+  display: grid;
+  justify-items: center;
+  gap: var(--s-2);
+  padding: var(--s-3);
+  border: 1px solid var(--rim);
+  border-radius: var(--r-control);
+  background: var(--vessel);
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+
+.orbCell:hover {
+  border-color: var(--rim-lit);
+}
+
+.orbCell[aria-pressed='true'] {
+  border-color: var(--rim-lit);
+  background: var(--vessel-high);
+}
+
+.ramp {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+  gap: var(--s-3);
+}
+
+.swatch {
+  border: 1px solid var(--rim);
+  border-radius: var(--r-control);
+  overflow: hidden;
+  background: var(--vessel);
+}
+
+.swatchChip {
+  height: 56px;
+}
+
+.swatchName {
+  padding: var(--s-3);
+  font: var(--fs-mono-sm);
+  letter-spacing: var(--tr-mono-sm);
+  color: var(--ash);
+}
+
+.specimen {
+  display: grid;
+  gap: var(--s-5);
+}
+
+.specimenRow {
+  display: grid;
+  grid-template-columns: 132px 1fr;
+  gap: var(--s-5);
+  align-items: baseline;
+  padding-bottom: var(--s-4);
+  border-bottom: 1px solid var(--rim);
+}
+
+.specimenLabel {
+  font: var(--fs-label);
+  letter-spacing: var(--tr-label);
+  text-transform: uppercase;
+  color: var(--dust);
+}
+
+.panel {
+  background: var(--vessel);
+  border: 1px solid var(--rim);
+  border-radius: var(--r-panel);
+  padding: var(--s-5);
+}
