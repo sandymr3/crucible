@@ -1,0 +1,30 @@
+# Credentials — NEVER commit these.
+secrets/
+*.key.json
+key.json
+.env
+.env.*
+!.env.example
+
+# Build output
+bin/
+crucible-server
+crucible-server.exe
+*.exe
+
+# Go
+vendor/
+*.test
+*.out
+coverage.*
+
+# Local scratch
+testdata/out/
+*.wav.tmp
+docs/checkpoints/*.local.md
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

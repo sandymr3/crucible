@@ -1,0 +1,27 @@
+# What NOT to upload to Cloud Build.
+#
+# This file exists primarily for one line: secrets/. Without an explicit
+# .gcloudignore, gcloud synthesises one, and a service account key travelling
+# into a build context is a credential leak that is very hard to notice after
+# the fact. Being explicit here is worth more than being terse.
+
+secrets/
+*.key.json
+key.json
+.env
+.env.*
+!.env.example
+
+.git/
+.gitignore
+
+# Build output — the image builds from source inside Cloud Build.
+bin/
+*.exe
+vendor/
+
+# Local-only material.
+testdata/out/
+docs/checkpoints/
+*.test
+coverage.*

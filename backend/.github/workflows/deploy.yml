@@ -1,0 +1,61 @@
+name: backend
+
+# Removes an entire category of demo-day mistake: the one where you deploy by
+# hand from a dirty working tree at 3 a.m.
+on:
+  push:
+    branches: [main]
+    paths: ['backend/**', '.github/workflows/deploy.yml']
+  pull_request:
+    paths: ['backend/**']
+
+env:
+  PROJECT: crucible-hack-0725
+  REGION: us-central1
+  SERVICE: crucible-backend
+
+defaults:
+  run:
+    working-directory: backend
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: backend/go.mod
+          cache-dependency-path: backend/go.sum
+      - run: go vet ./...
+      # Unit tests only. The integration suite calls live Vertex and would
+      # burn credits on every push.
+      - run: go test ./... -count=1
+
+  deploy:
+    needs: check
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write   # Workload Identity Federation — no key file in CI.
+    steps:
+      - uses: actions/checkout@v4
+
+      # Preferred over a service account key in a GitHub secret: nothing
+      # long-lived is stored anywhere. Configure the provider once with:
+      #   gcloud iam workload-identity-pools create ...
+      # See docs/checkpoints/phase-0.md for the exact commands.
+      - uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
+          service_account: ${{ secrets.GCP_DEPLOY_SA }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Deploy to Cloud Run
+        run: bash deploy/deploy.sh
+        env:
+          GOOGLE_CLOUD_PROJECT: ${{ env.PROJECT }}
+          CLOUD_RUN_REGION: ${{ env.REGION }}
+          CLOUD_RUN_SERVICE: ${{ env.SERVICE }}

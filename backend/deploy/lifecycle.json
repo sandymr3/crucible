@@ -1,0 +1,27 @@
+{
+  "comment": [
+    "Turn audio is the bulk of storage and is worthless once the report exists.",
+    "Deleting it after 7 days is both the cheap call and the right privacy call:",
+    "we are storing recordings of people being interrogated about their weakest",
+    "professional claims, and there is no reason to keep that indefinitely.",
+    "Resumes are kept longer so a user can re-run a session without re-uploading."
+  ],
+  "lifecycle": {
+    "rule": [
+      {
+        "action": { "type": "Delete" },
+        "condition": {
+          "age": 7,
+          "matchesPrefix": ["audio/"]
+        }
+      },
+      {
+        "action": { "type": "Delete" },
+        "condition": {
+          "age": 30,
+          "matchesPrefix": ["resumes/"]
+        }
+      }
+    ]
+  }
+}
