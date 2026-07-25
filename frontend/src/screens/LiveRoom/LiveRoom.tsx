@@ -54,8 +54,18 @@ export default function LiveRoom() {
   const { start, reset } = session
 
   useEffect(() => {
-    if (id) void start(id)
-    return () => reset()
+    // Deferred by a tick, and cancelled in cleanup. StrictMode dev-mounts
+    // effects twice, and two eager connects make the second hit the backend's
+    // one-live-session-per-user guardrail (409 "user already has a live
+    // session") while the first socket is still tearing down — which presents
+    // as "Connection lost" the moment the room opens.
+    const connect = window.setTimeout(() => {
+      if (id) void start(id)
+    }, 0)
+    return () => {
+      window.clearTimeout(connect)
+      reset()
+    }
   }, [id, start, reset])
 
   // The orb follows real output amplitude rather than a decorative loop.
