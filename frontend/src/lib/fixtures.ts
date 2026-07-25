@@ -1,3 +1,4 @@
+import type { ByteSpan } from './byteOffset'
 import type { SpanRange } from './segments'
 import type { Verdict } from './verdict'
 
@@ -48,6 +49,54 @@ export const DEMO_SPANS: SpanRange[] = [
     verdict: 'unsupported',
     concept: 'throughput claim',
     explanation: 'A specific number with nothing behind it. How was it measured, and at what percentile?',
+  }),
+]
+
+/**
+ * The same demo, but written the way a real transcription renders speech — with
+ * an accent, an em dash, a curly quote and an emoji — and carrying UTF-8 BYTE
+ * offsets exactly as the Go backend sends them.
+ *
+ * This exists to exercise the byte→character conversion through the real
+ * component rather than only in unit tests. Every span here sits after at least
+ * one multi-byte character, so if the conversion regresses the highlights
+ * visibly slide off their words instead of failing quietly.
+ */
+export const DEMO_UNICODE_TRANSCRIPT =
+  'That was naïve — we didn’t have real flow control, so backpressure was just ' +
+  'a bigger buffer, and it held 🔥 at 2000 req/s until the parameter server fell over.'
+
+/** Byte offsets computed the way Go would, rather than hand-counted. */
+function byteSpanOf(
+  text: string,
+  excerpt: string,
+  span: Omit<ByteSpan, 'start' | 'end' | 'excerpt'>,
+): ByteSpan {
+  const at = text.indexOf(excerpt)
+  if (at < 0) {
+    throw new Error(`fixtures: excerpt not found: ${JSON.stringify(excerpt)}`)
+  }
+  const encoder = new TextEncoder()
+  const start = encoder.encode(text.slice(0, at)).length
+  return { start, end: start + encoder.encode(excerpt).length, excerpt, ...span }
+}
+
+export const DEMO_UNICODE_BYTE_SPANS: ByteSpan[] = [
+  byteSpanOf(DEMO_UNICODE_TRANSCRIPT, 'real flow control', {
+    verdict: 'validated',
+    concept: 'flow control',
+    explanation: 'Right diagnosis — naming the absence of flow control is the whole insight.',
+  }),
+  byteSpanOf(DEMO_UNICODE_TRANSCRIPT, 'backpressure was just a bigger buffer', {
+    verdict: 'incorrect',
+    concept: 'backpressure',
+    explanation: 'A bigger buffer delays the problem. It is not flow control.',
+    correction: 'Backpressure signals the producer to slow down.',
+  }),
+  byteSpanOf(DEMO_UNICODE_TRANSCRIPT, '2000 req/s', {
+    verdict: 'unsupported',
+    concept: 'throughput claim',
+    explanation: 'A specific number with nothing behind it. Measured how, at what percentile?',
   }),
 ]
 

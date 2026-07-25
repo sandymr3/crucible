@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Lightbulb, CornerDownLeft, Keyboard, Square } from 'lucide-react'
 
 import {
@@ -12,7 +12,13 @@ import {
 } from '../../components/primitives'
 import { HeatmapReveal } from '../../components/verdict'
 import { BAND_NAMES, currentBand, setBand, type Band } from '../../lib/band'
-import { DEMO_SPANS, DEMO_TRANSCRIPT } from '../../lib/fixtures'
+import { resolveSpanRanges } from '../../lib/byteOffset'
+import {
+  DEMO_SPANS,
+  DEMO_TRANSCRIPT,
+  DEMO_UNICODE_BYTE_SPANS,
+  DEMO_UNICODE_TRANSCRIPT,
+} from '../../lib/fixtures'
 import { VERDICTS, VERDICT_DEFINITION, VERDICT_NAME, verdictColor } from '../../lib/verdict'
 import { pushToast } from '../../store/toasts'
 import s from './Dev.module.css'
@@ -62,6 +68,14 @@ export default function Dev() {
   const [band, setLocalBand] = useState<Band>(currentBand)
   const [highContrast, setHighContrast] = useState(false)
   const [revealNonce, setRevealNonce] = useState(0)
+
+  // The byte→character conversion, exercised through the real component. Every
+  // span in this fixture sits after at least one multi-byte character, so a
+  // regression slides the highlights off their words visibly.
+  const unicodeRanges = useMemo(
+    () => resolveSpanRanges(DEMO_UNICODE_TRANSCRIPT, DEMO_UNICODE_BYTE_SPANS),
+    [],
+  )
 
   function pick(next: Band) {
     setBand(next)
@@ -153,6 +167,25 @@ export default function Dev() {
             />
           </div>
         </Panel>
+      </section>
+
+      <section className={s.section}>
+        <h2 className={s.sectionHead}>Heatmap · UTF-8 byte offsets</h2>
+        <Label tone="quiet">
+          accent, em dash, curly quote and emoji — spans arrive as Go byte offsets
+        </Label>
+        <Panel flush>
+          <div style={{ padding: 'var(--s-5)' }}>
+            <HeatmapReveal
+              text={DEMO_UNICODE_TRANSCRIPT}
+              ranges={unicodeRanges}
+              revealKey={`unicode-${revealNonce}`}
+            />
+          </div>
+        </Panel>
+        <Label tone="quiet">
+          resolved {unicodeRanges.length} of {DEMO_UNICODE_BYTE_SPANS.length} spans
+        </Label>
       </section>
 
       <section className={s.section}>
