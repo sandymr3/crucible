@@ -1,0 +1,37 @@
+# Root ignores. backend/.gitignore covers the same ground for its own tree;
+# this is deliberate belt-and-braces, because the single worst mistake this
+# repository could make is publishing a service account key.
+
+# --- Credentials. Never commit these. ---
+secrets/
+**/secrets/
+*.key.json
+key.json
+serviceaccount*.json
+*-credentials.json
+webapikey.txt
+idtoken.txt
+**/tok-*.txt
+**/*tok.txt
+
+.env
+.env.*
+!.env.example
+
+# --- Test output: contains generated audio, tokens, and API responses ---
+testdata/out/
+**/testdata/out/
+
+# --- Build artifacts ---
+bin/
+*.exe
+vendor/
+*.test
+coverage.*
+
+# --- Editor / OS ---
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
