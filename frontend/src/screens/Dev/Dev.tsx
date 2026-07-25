@@ -1,6 +1,18 @@
 import { useState } from 'react'
+import { Lightbulb, CornerDownLeft, Keyboard, Square } from 'lucide-react'
 
+import {
+  Button,
+  ButtonGroup,
+  Chip,
+  Label,
+  Panel,
+  Popover,
+  StatusLabel,
+} from '../../components/primitives'
 import { BAND_NAMES, currentBand, setBand, type Band } from '../../lib/band'
+import { VERDICTS, VERDICT_DEFINITION, VERDICT_NAME, verdictColor } from '../../lib/verdict'
+import { pushToast } from '../../store/toasts'
 import s from './Dev.module.css'
 
 /**
@@ -51,6 +63,16 @@ export default function Dev() {
   function pick(next: Band) {
     setBand(next)
     setLocalBand(next)
+    // Mirrors the real band choreography: the toast carries the backend's own
+    // `message` copy and is accented with the new band's ramp colour.
+    pushToast({
+      title: `Band ${next} — ${BAND_NAMES[next]}`,
+      message:
+        next > band
+          ? "Difficulty raised — you've proven the fundamentals."
+          : "Easing off — let's rebuild from the mechanism.",
+      accent: 'var(--heat-hot)',
+    })
   }
 
   function toggleContrast() {
@@ -107,6 +129,91 @@ export default function Dev() {
               <div className={s.swatchChip} style={{ background: `var(${token})` }} />
               <div className={s.swatchName}>{token}</div>
             </div>
+          ))}
+        </div>
+      </section>
+
+      <section className={s.section}>
+        <h2 className={s.sectionHead}>Buttons</h2>
+        <div className={s.controls}>
+          <Button variant="primary" size="hero">
+            Start a session
+          </Button>
+          <Button variant="secondary">Type instead</Button>
+          <Button variant="ghost">How it works</Button>
+          <Button variant="danger">End interview</Button>
+          <Button variant="secondary" size="compact">
+            Compact
+          </Button>
+          <Button variant="primary" disabled>
+            Disabled
+          </Button>
+        </div>
+        <div style={{ maxWidth: 300 }}>
+          <ButtonGroup>
+            <Button variant="ghost" icon={<Lightbulb size={20} strokeWidth={1.5} />}>
+              Request a hint
+            </Button>
+            <Button variant="ghost" icon={<CornerDownLeft size={20} strokeWidth={1.5} />}>
+              I&rsquo;m done answering
+            </Button>
+            <Button variant="ghost" icon={<Keyboard size={20} strokeWidth={1.5} />}>
+              Type instead
+            </Button>
+            <Button variant="danger" icon={<Square size={20} strokeWidth={1.5} />}>
+              End interview
+            </Button>
+          </ButtonGroup>
+        </div>
+      </section>
+
+      <section className={s.section}>
+        <h2 className={s.sectionHead}>Panels, labels, status</h2>
+        <div className={s.ramp}>
+          <Panel title="Interview session">
+            <Label tone="quiet">The Tech Lead</Label>
+          </Panel>
+          <Panel title="Live transcript" aside="Q3 / ~6">
+            <Label>evaluating technical depth</Label>
+          </Panel>
+          <Panel title="Delivery">
+            <StatusLabel color="var(--state-live)" pulse>
+              Listening
+            </StatusLabel>
+          </Panel>
+          <Panel title="Progress">
+            <StatusLabel color="var(--state-thinking)">Evaluating</StatusLabel>
+          </Panel>
+        </div>
+      </section>
+
+      <section className={s.section}>
+        <h2 className={s.sectionHead}>Chips · concept heatmap</h2>
+        <div className={s.controls}>
+          <Chip>queue depth</Chip>
+          <Chip tone="validated">bloom filter</Chip>
+          <Chip tone="incomplete">cache eviction</Chip>
+          <Chip tone="unsupported">2000 req/s</Chip>
+          <Chip tone="incorrect">backpressure</Chip>
+        </div>
+      </section>
+
+      <section className={s.section}>
+        <h2 className={s.sectionHead}>Verdict popovers</h2>
+        <div className={s.controls} style={{ alignItems: 'flex-start' }}>
+          {VERDICTS.map((verdict) => (
+            <Popover
+              key={verdict}
+              verdict={verdict}
+              concept={VERDICT_NAME[verdict].toLowerCase()}
+              explanation={VERDICT_DEFINITION[verdict]}
+              correction={
+                verdict === 'incorrect' || verdict === 'incomplete'
+                  ? 'A bigger buffer delays the problem. It is not flow control.'
+                  : undefined
+              }
+              style={{ color: verdictColor(verdict) }}
+            />
           ))}
         </div>
       </section>

@@ -1,5 +1,6 @@
 import { Route, Routes } from 'react-router-dom'
 
+import { ToastHost } from './components/primitives'
 import { ThermalField } from './components/thermal/ThermalField'
 import Dev from './screens/Dev/Dev'
 
@@ -33,6 +34,7 @@ export default function App() {
           <Route path="*" element={<Placeholder name="Not found" />} />
         </Routes>
       </div>
+      <ToastHost />
     </>
   )
 }

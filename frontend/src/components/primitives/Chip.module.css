@@ -1,0 +1,60 @@
+/**
+ * Chips — concept tiles, plan-area tags, small badges.
+ *
+ * Restrained on purpose. A concept heatmap is a dense grid of these, and if
+ * each one carried a full-strength fill the right rail would become a
+ * highlighter-pen mess and break the 90/10 rule. The accent lives in the text
+ * and a low-strength border; the surface stays near-monochrome.
+ */
+
+.chip {
+  --chip-accent: var(--ash);
+
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  min-height: 28px;
+  padding: 0 var(--s-3);
+  border-radius: var(--r-control);
+  border: 1px solid var(--rim);
+  background: var(--vessel-high);
+  color: var(--ash);
+  font: var(--fs-mono-sm);
+  letter-spacing: var(--tr-mono-sm);
+  white-space: nowrap;
+}
+
+/* Accented tones tint the text and border only. */
+.chip[data-tone]:not([data-tone='neutral']) {
+  color: var(--chip-accent);
+  border-color: color-mix(in oklch, var(--chip-accent) 35%, var(--rim));
+  background: color-mix(in oklch, var(--chip-accent) 10%, var(--vessel-high));
+}
+
+.chip[data-tone='validated'] {
+  --chip-accent: var(--verdict-validated);
+}
+.chip[data-tone='incomplete'] {
+  --chip-accent: var(--verdict-incomplete);
+}
+.chip[data-tone='unsupported'] {
+  --chip-accent: var(--verdict-unsupported);
+}
+.chip[data-tone='incorrect'] {
+  --chip-accent: var(--verdict-incorrect);
+}
+
+/* Wraps long concept names instead of overflowing the rail. */
+.chip[data-wrap='true'] {
+  white-space: normal;
+  text-align: left;
+  line-height: 1.35;
+  padding-block: var(--s-2);
+}
+
+/* Colour is never the only signal (§12). The glyph carries the verdict for
+   anyone who cannot separate the hues. */
+.glyph {
+  font-weight: 700;
+  flex: none;
+}
