@@ -3,6 +3,7 @@ import { Route, Routes } from 'react-router-dom'
 import { ToastHost } from './components/primitives'
 import { ThermalField } from './components/thermal/ThermalField'
 import Dev from './screens/Dev/Dev'
+import LiveRoom from './screens/LiveRoom/LiveRoom'
 
 /**
  * Route map from the screen spec. Screens land one per build step; until then a
@@ -25,7 +26,7 @@ export default function App() {
           <Route path="/setup/:id/digest" element={<Placeholder name="Digest" />} />
           <Route path="/setup/:id/persona" element={<Placeholder name="Persona" />} />
           <Route path="/setup/:id/plan" element={<Placeholder name="Plan" />} />
-          <Route path="/room/:id" element={<Placeholder name="Live Room" />} />
+          <Route path="/room/:id" element={<LiveRoom />} />
           <Route path="/report/:id" element={<Placeholder name="Report" />} />
           <Route path="/roadmap/:id" element={<Placeholder name="Roadmap" />} />
           <Route path="/study/:id" element={<Placeholder name="Study" />} />

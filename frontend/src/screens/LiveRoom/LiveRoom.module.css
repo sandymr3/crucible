@@ -1,0 +1,401 @@
+/**
+ * The Live Room (design PRD §8).
+ *
+ * Three columns rather than two: it keeps the metrics on screen permanently
+ * instead of hiding them behind a state change, which matters enormously when
+ * a judge needs to see grading happen without anyone narrating it.
+ *
+ * 100dvh, not 100vh — vh is wrong on mobile browsers with dynamic chrome. The
+ * room must NEVER scroll: every column scrolls internally and the page does
+ * not, which is why every track carries min-height: 0.
+ */
+
+.room {
+  display: grid;
+  grid-template-columns: 300px minmax(520px, 1fr) 340px;
+  grid-template-rows: 64px 1fr 44px;
+  gap: var(--s-3);
+  padding: var(--s-3);
+  height: 100dvh;
+  overflow: hidden;
+}
+
+/* At 1280x800 — the projector target — this leaves a 592px transcript, which
+   clears the 520px floor. If space is needed, take it from the right rail and
+   never from the centre.
+   The breakpoint is 1207px rather than a round number because that is exactly
+   where the arithmetic stops working: 520 + 300 + 340 + two 12px gaps + 24px of
+   padding is 1208. A single pixel below and minmax's floor forces the grid
+   wider than the viewport, and the room scrolls sideways. */
+@media (max-width: 1207px) {
+  .room {
+    grid-template-columns: 280px minmax(0, 1fr);
+  }
+  .rightRail {
+    display: none;
+  }
+}
+
+.header,
+.statusBar {
+  grid-column: 1 / -1;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--s-5);
+  padding: 0 var(--s-5);
+  background: var(--vessel);
+  border: 1px solid var(--rim);
+  border-radius: var(--r-panel);
+}
+
+.wordmark {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 17px;
+  font-variation-settings: 'wdth' 112;
+  color: var(--bone);
+}
+
+.mark {
+  width: 18px;
+  height: 18px;
+  border-radius: var(--r-full);
+  background: var(--t-ember);
+  box-shadow: 0 0 0 1px color-mix(in oklch, var(--t-ember) 45%, transparent);
+  flex: none;
+}
+
+.headerContext {
+  color: var(--ash);
+  font: var(--fs-small);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.headerRight {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--s-5);
+}
+
+/* The width axis broadens the numeral as difficulty rises (§5.2). `font` must
+   be set before font-variation-settings — the shorthand resets it. */
+.bandIndicator {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-2);
+}
+
+.bandNumeral {
+  font-family: var(--font-display);
+  font-size: 26px;
+  line-height: 1;
+  font-variation-settings:
+    'wdth' var(--band-width),
+    'wght' 700;
+  color: var(--bone);
+}
+
+.timer {
+  font: var(--fs-mono-sm);
+  letter-spacing: var(--tr-mono-sm);
+  color: var(--ash);
+  font-variant-numeric: tabular-nums;
+}
+
+.timerWarn {
+  color: var(--t-warm);
+}
+
+/* ── columns ─────────────────────────────────────────────────────────── */
+
+.leftRail,
+.centre,
+.rightRail {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+
+.rightRail {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* ── left rail ───────────────────────────────────────────────────────── */
+
+.identity {
+  display: grid;
+  justify-items: center;
+  gap: var(--s-4);
+  padding-top: var(--s-5);
+}
+
+.personaName {
+  text-align: center;
+}
+
+.focusLine {
+  text-align: center;
+  color: var(--dust);
+}
+
+.question {
+  font: var(--fs-quote);
+  font-style: italic;
+  color: var(--bone);
+  padding-top: var(--s-4);
+  margin-top: var(--s-4);
+  border-top: 1px solid var(--rim);
+}
+
+.questionEmpty {
+  color: var(--dust);
+}
+
+.controls {
+  margin-top: auto;
+}
+
+.hintCard {
+  margin-top: var(--s-3);
+  padding: var(--s-3) var(--s-4);
+  border: 1px solid color-mix(in oklch, var(--t-warm) 35%, var(--rim));
+  border-radius: var(--r-control);
+  background: color-mix(in oklch, var(--t-warm) 8%, var(--vessel));
+  font: var(--fs-small);
+  color: var(--bone);
+}
+
+.hintPenalty {
+  display: block;
+  margin-top: var(--s-1);
+  color: var(--t-warm);
+}
+
+/* ── transcript ──────────────────────────────────────────────────────── */
+
+.transcript {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+
+.scroller {
+  height: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0 var(--s-5) var(--s-6);
+  scroll-behavior: smooth;
+}
+
+.turn {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+  gap: var(--s-4);
+  padding: var(--s-5) 0;
+  border-bottom: 1px solid var(--rim);
+}
+
+.turn:last-child {
+  border-bottom: none;
+}
+
+/* Hanging in the left margin rather than inline, so they never interrupt a
+   sentence the candidate is reading back. */
+.timestamp {
+  font: var(--fs-mono-sm);
+  letter-spacing: var(--tr-mono-sm);
+  color: var(--dust);
+  padding-top: 6px;
+  font-variant-numeric: tabular-nums;
+}
+
+.turnQuestion {
+  font: var(--fs-small);
+  color: var(--ash);
+  margin-bottom: var(--s-3);
+}
+
+.answer {
+  font: var(--fs-transcript);
+  letter-spacing: var(--tr-transcript);
+  color: var(--bone);
+  max-width: 68ch;
+}
+
+/* Unfinalised speech. The backend notes interim frames did not fire in manual
+   activity mode, so this is an enhancement and never load-bearing. */
+.interim {
+  color: var(--ash);
+  opacity: 0.7;
+}
+
+.caret {
+  display: inline-block;
+  width: 2px;
+  height: 1.1em;
+  vertical-align: text-bottom;
+  margin-left: 2px;
+  background: var(--state-live);
+  animation: blink 1.1s steps(2, start) infinite;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+.ungraded {
+  margin-top: var(--s-3);
+  font: var(--fs-small);
+  color: var(--dust);
+}
+
+/* EVALUATING: an 8% shimmer sweep across the answer being read. */
+.evaluating {
+  background-image: linear-gradient(
+    100deg,
+    transparent 30%,
+    color-mix(in oklch, var(--bone) 8%, transparent) 50%,
+    transparent 70%
+  );
+  background-size: 220% 100%;
+  animation: shimmer 1.6s linear infinite;
+}
+
+@keyframes shimmer {
+  to {
+    background-position: -120% 0;
+  }
+}
+
+.empty {
+  padding: var(--s-10) var(--s-5);
+  color: var(--dust);
+  font: var(--fs-body);
+  max-width: 48ch;
+}
+
+/* A transcript that fights you is infuriating, so auto-scroll yields the
+   moment the user scrolls up, and offers its way back. */
+.jumpPill {
+  position: absolute;
+  bottom: var(--s-4);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+}
+
+/* ── composer ────────────────────────────────────────────────────────── */
+
+.composer {
+  display: flex;
+  gap: var(--s-2);
+  padding: var(--s-4) var(--s-5);
+  border-top: 1px solid var(--rim);
+}
+
+.composerInput {
+  flex: 1;
+  min-height: 44px;
+  max-height: 140px;
+  resize: vertical;
+  padding: var(--s-3) var(--s-4);
+  background: var(--vessel-high);
+  border: 1px solid var(--rim);
+  border-radius: var(--r-control);
+  color: var(--bone);
+  font: var(--fs-body);
+}
+
+.composerInput::placeholder {
+  color: var(--dust);
+}
+
+/* ── status bar ──────────────────────────────────────────────────────── */
+
+.statusBar {
+  display: flex;
+  align-items: center;
+  gap: var(--s-6);
+  padding: 0 var(--s-5);
+  background: var(--vessel);
+  border: 1px solid var(--rim);
+  border-radius: var(--r-panel);
+}
+
+.statusItem {
+  color: var(--ash);
+}
+
+.statusRight {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--s-6);
+}
+
+/* ── overlays ────────────────────────────────────────────────────────── */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: var(--s-6);
+  background: color-mix(in oklch, var(--void) 78%, transparent);
+}
+
+.dialog {
+  width: min(440px, 100%);
+  padding: var(--s-6);
+  background: var(--vessel-high);
+  border: 1px solid var(--rim);
+  border-radius: var(--r-panel);
+  box-shadow: var(--shadow-float);
+  display: grid;
+  gap: var(--s-4);
+}
+
+.dialogTitle {
+  font: var(--fs-h3);
+  letter-spacing: var(--tr-h3);
+  color: var(--bone);
+}
+
+.dialogBody {
+  font: var(--fs-body);
+  color: var(--ash);
+}
+
+.dialogActions {
+  display: flex;
+  gap: var(--s-2);
+  justify-content: flex-end;
+}
+
+.fatal {
+  border-color: color-mix(in oklch, var(--t-assay) 40%, var(--rim));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroller {
+    scroll-behavior: auto;
+  }
+  .evaluating,
+  .caret {
+    animation: none;
+  }
+}

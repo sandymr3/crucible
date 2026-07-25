@@ -35,6 +35,8 @@ export interface LiveTurn {
   hints: { text: string; penalty: number }[]
   band: number
   closed: boolean
+  /** Wall clock when the turn opened, for the transcript's hanging timestamps. */
+  at: number
 }
 
 export interface LiveError {
@@ -55,6 +57,7 @@ export function emptyTurn(index: number, band: number): LiveTurn {
     hints: [],
     band,
     closed: false,
+    at: Date.now(),
   }
 }
 
@@ -95,6 +98,8 @@ interface SessionState {
   sendText: (text: string) => void
   requestHint: () => void
   end: () => Promise<void>
+  /** Dismiss the connection notice. Only meaningful while the socket lives. */
+  dismissConnectionLost: () => void
   reset: () => void
 }
 
@@ -247,11 +252,28 @@ export const useSession = create<SessionState>((set, get) => ({
     set({ connection: 'closed' })
   },
 
+  dismissConnectionLost() {
+    set({ connectionLost: false })
+  },
+
   reset() {
     void teardown()
     set({ ...initial })
   },
 }))
+
+/**
+ * Whether typing an answer would actually reach the interviewer.
+ *
+ * text_answer travels the identical downstream path as speech — but only while
+ * the socket is open. All three connection-ending error codes are followed by
+ * the relay tearing down, so once it has closed there is nothing to type into.
+ * Offering "continue in text mode" then would be exactly the dishonest
+ * degradation the no-reconnect rule exists to prevent.
+ */
+export function canContinueInText(state: SessionState): boolean {
+  return state.connection === 'open'
+}
 
 async function teardown() {
   socket?.close()
