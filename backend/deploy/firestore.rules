@@ -1,0 +1,88 @@
+rules_version = '2';
+
+// Crucible Firestore security rules.
+//
+// Written on day one rather than day five: retrofitting rules onto a live data
+// model is miserable, and an open Firestore is the single easiest way to leak
+// every user's resume and interview transcript.
+//
+// The governing principle: the BACKEND is the only writer. It authenticates
+// with a service account, which bypasses these rules entirely. So everything
+// below exists to constrain the *client* SDK, which the frontend uses to read
+// its own data and to subscribe to live document updates.
+//
+// Clients therefore get read access to their own documents and no write access
+// anywhere. Every mutation goes through the authenticated REST API, where the
+// guardrails live. A client that could write its own session document could set
+// its own difficulty band, forge its own scores, or reset its daily cap.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    // A user's own profile. Readable by them; written only by the backend.
+    match /users/{uid} {
+      allow read: if isOwner(uid);
+      allow write: if false;
+
+      // Daily session counters back a credit guardrail. Readable so the UI can
+      // show "3 of 5 sessions used today"; never client-writable, since that
+      // would make the cap advisory.
+      match /counters/{date} {
+        allow read: if isOwner(uid);
+        allow write: if false;
+      }
+    }
+
+    // Sessions and everything beneath them.
+    match /sessions/{sessionId} {
+      // resource == null guards the case where the document does not exist,
+      // which otherwise throws rather than denying.
+      allow read: if isSignedIn()
+                  && resource != null
+                  && resource.data.uid == request.auth.uid;
+      allow write: if false;
+
+      // Turns carry the transcript, the evaluation, and the heatmap spans.
+      // Ownership is checked against the PARENT session: turn documents do not
+      // carry a uid of their own, and duplicating one would create a second
+      // source of truth that could drift.
+      match /turns/{turnId} {
+        allow read: if isSignedIn()
+                    && get(/databases/$(database)/documents/sessions/$(sessionId)).data.uid == request.auth.uid;
+        allow write: if false;
+      }
+
+      match /report/{docId} {
+        allow read: if isSignedIn()
+                    && get(/databases/$(database)/documents/sessions/$(sessionId)).data.uid == request.auth.uid;
+        allow write: if false;
+      }
+
+      match /roadmap/{docId} {
+        allow read: if isSignedIn()
+                    && get(/databases/$(database)/documents/sessions/$(sessionId)).data.uid == request.auth.uid;
+        allow write: if false;
+      }
+    }
+
+    // The aggregate token ledger is operator data, not user data. It reveals
+    // nothing about individuals but plenty about our spend, so it is
+    // backend-only in both directions.
+    match /usage/{date} {
+      allow read, write: if false;
+    }
+
+    // Deny by default. Any collection added later is closed until someone
+    // deliberately opens it.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
