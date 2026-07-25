@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Lightbulb, CornerDownLeft, Keyboard, Square } from 'lucide-react'
 
+import { BandIndicator } from '../../components/band/BandIndicator'
 import { Orb, useAmplitude } from '../../components/orb'
 import * as api from '../../lib/api'
 import { PERSONA_FALLBACK_NAME, PERSONA_IDS, type PersonaId } from '../../lib/persona'
@@ -20,6 +21,7 @@ import {
 import { HeatmapReveal } from '../../components/verdict'
 import { BAND_NAMES, currentBand, setBand, type Band } from '../../lib/band'
 import { resolveSpanRanges } from '../../lib/byteOffset'
+import { BAND_ANNOUNCE_DELAY_MS } from '../../lib/reveal'
 import {
   DEMO_SPANS,
   DEMO_TRANSCRIPT,
@@ -84,6 +86,7 @@ const SPECIMEN: { token: string; label: string; sample: string }[] = [
 export default function Dev() {
   const [band, setLocalBand] = useState<Band>(currentBand)
   const [highContrast, setHighContrast] = useState(false)
+  const [bandChangedAt, setBandChangedAt] = useState<number | null>(null)
   const [revealNonce, setRevealNonce] = useState(0)
   const [orbState, setOrbState] = useState<LiveState>('LISTENING')
   const [persona, setPersona] = useState<PersonaId>('tech_lead')
@@ -132,18 +135,21 @@ export default function Dev() {
   )
 
   function pick(next: Band) {
+    // Runs the §8.6 sequence exactly as a `band` frame does: the room moves at
+    // t=0, the toast and the flare follow at t=120.
     setBand(next)
     setLocalBand(next)
-    // Mirrors the real band choreography: the toast carries the backend's own
-    // `message` copy and is accented with the new band's ramp colour.
-    pushToast({
-      title: `Band ${next} — ${BAND_NAMES[next]}`,
-      message:
-        next > band
-          ? "Difficulty raised — you've proven the fundamentals."
-          : "Easing off — let's rebuild from the mechanism.",
-      accent: 'var(--heat-hot)',
-    })
+    setBandChangedAt(Date.now())
+    setTimeout(() => {
+      pushToast({
+        title: `Band ${next} — ${BAND_NAMES[next]}`,
+        message:
+          next > band
+            ? "Difficulty raised — you've proven the fundamentals."
+            : "Easing off — let's rebuild from the mechanism.",
+        accent: 'var(--heat-hot)',
+      })
+    }, BAND_ANNOUNCE_DELAY_MS)
   }
 
   function toggleContrast() {
@@ -175,7 +181,9 @@ export default function Dev() {
         </div>
         <div className={s.panel}>
           <div className={s.specimenLabel}>Width axis · wdth {`{`}--band-width{`}`}</div>
-          <div className={s.bandNumeral}>{band}</div>
+          <div style={{ padding: 'var(--s-4) 0' }}>
+            <BandIndicator band={band} changedAt={bandChangedAt} size={76} label="" />
+          </div>
           <div className={s.specimenLabel}>{BAND_NAMES[band]}</div>
         </div>
       </section>

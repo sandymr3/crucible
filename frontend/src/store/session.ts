@@ -7,6 +7,7 @@ import { resolveSpanRanges, type ByteSpan } from '../lib/byteOffset'
 import { getIdToken } from '../lib/firebase'
 import type { PersonaId } from '../lib/persona'
 import type { LiveState, ServerFrame } from '../lib/protocol'
+import { BAND_ANNOUNCE_DELAY_MS } from '../lib/reveal'
 import type { SpanRange } from '../lib/segments'
 import { LiveSocket, type SocketStats } from '../lib/socket'
 import type { Evaluation, Mode, Session } from '../lib/types'
@@ -73,6 +74,8 @@ interface SessionState {
 
   turns: LiveTurn[]
   band: number
+  /** Drives the flare sweep. `at` changes on every promotion or demotion. */
+  lastBandChange: { from: number; to: number; at: number } | null
   hintsUsed: number
 
   usage: { totalTokens: number; audioIn: number; audioOut: number }
@@ -124,6 +127,7 @@ const initial = {
   micHot: false,
   turns: [],
   band: 3,
+  lastBandChange: null,
   hintsUsed: 0,
   usage: { totalTokens: 0, audioIn: 0, audioOut: 0 },
   socketStats: null,
@@ -472,16 +476,23 @@ function handleBand(frame: ServerFrame, set: Setter, get: Getter) {
   if (typeof to !== 'number') return
 
   const from = frame.from ?? get().band
-  setBand(to)
-  set({ band: to })
 
-  // Adaptation the user cannot perceive is worthless. `message` is the
-  // backend's own explanation, written to be read.
-  pushToast({
-    title: frame.text ?? `Band ${to}`,
-    message: frame.message ?? (to > from ? 'Difficulty raised.' : 'Easing off.'),
-    accent: 'var(--heat-hot)',
-  })
+  // t=0 — the room begins moving. One attribute write drives the 1800ms
+  // thermal transition and the 900ms width axis at once.
+  setBand(to)
+  set({ band: to, lastBandChange: { from, to, at: Date.now() } })
+
+  // t=120 — the explanation follows the room rather than arriving with it,
+  // which is what makes the change read as a consequence rather than a
+  // coincidence. Adaptation the user cannot perceive is worthless, and
+  // `message` is the backend's own copy, written to be read.
+  setTimeout(() => {
+    pushToast({
+      title: frame.text ?? `Band ${to}`,
+      message: frame.message ?? (to > from ? 'Difficulty raised.' : 'Easing off.'),
+      accent: 'var(--heat-hot)',
+    })
+  }, BAND_ANNOUNCE_DELAY_MS)
 }
 
 function handleError(frame: ServerFrame, set: Setter) {

@@ -1,9 +1,10 @@
-import { beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { ServerFrame } from '../lib/protocol'
+import { BAND_ANNOUNCE_DELAY_MS } from '../lib/reveal'
 import type { Evaluation, Span } from '../lib/types'
 import { emptyTurn, handleFrame, type LiveTurn } from './session'
-import { useToasts } from './toasts'
+import { TOAST_TTL_MS, useToasts } from './toasts'
 
 /**
  * Drives the protocol reducer directly — no socket, no backend, no browser.
@@ -16,6 +17,7 @@ function harness(turns: LiveTurn[] = [emptyTurn(0, 3)]) {
   let state = {
     turns,
     band: 3,
+    lastBandChange: null,
     state: 'CONNECTING',
     hintsUsed: 0,
     usage: { totalTokens: 0, audioIn: 0, audioOut: 0 },
@@ -78,6 +80,10 @@ function evaluation(spans: Span[], overrides: Partial<Evaluation> = {}): Evaluat
 
 beforeEach(() => {
   useToasts.getState().clear()
+})
+
+afterEach(() => {
+  vi.useRealTimers()
 })
 
 describe('transcripts', () => {
@@ -264,7 +270,23 @@ describe('ungraded turns', () => {
 })
 
 describe('band changes', () => {
-  it('moves the room and raises a toast carrying the backend copy', () => {
+  it('moves the room at t=0, before anything is announced', () => {
+    vi.useFakeTimers()
+    const h = harness()
+    h.send({ type: 'band', from: 3, to: 4, message: 'Difficulty raised.' })
+
+    expect(h.current.band).toBe(4)
+    // The signature: one attribute write drives the 1800ms thermal shift and
+    // the 900ms width axis together.
+    expect(document.documentElement.dataset.band).toBe('4')
+    // The explanation must NOT arrive with the room. Landing together reads as
+    // coincidence; landing after reads as consequence.
+    expect(useToasts.getState().toasts).toHaveLength(0)
+    vi.useRealTimers()
+  })
+
+  it('announces at t=120, carrying the backend copy verbatim', () => {
+    vi.useFakeTimers()
     const h = harness()
     h.send({
       type: 'band',
@@ -274,22 +296,60 @@ describe('band changes', () => {
       text: 'Band 4 — Tradeoff',
     })
 
-    expect(h.current.band).toBe(4)
-    // The signature: one attribute write drives the whole thermal shift.
-    expect(document.documentElement.dataset.band).toBe('4')
+    vi.advanceTimersByTime(119)
+    expect(useToasts.getState().toasts).toHaveLength(0)
 
-    const [toast] = useToasts.getState().toasts
-    expect(toast).toMatchObject({
+    vi.advanceTimersByTime(1)
+    expect(useToasts.getState().toasts[0]).toMatchObject({
       title: 'Band 4 — Tradeoff',
       message: "Difficulty raised — you've proven the fundamentals.",
     })
+    vi.useRealTimers()
+  })
+
+  it('records the change so the flare can fire on every move', () => {
+    // The band number alone is not enough: a demotion back to a band already
+    // seen still has to announce itself.
+    const h = harness()
+    h.send({ type: 'band', from: 3, to: 4 })
+    const first = h.current.lastBandChange
+    expect(first).toMatchObject({ from: 3, to: 4 })
+
+    h.send({ type: 'band', from: 4, to: 3 })
+    expect(h.current.lastBandChange).toMatchObject({ from: 4, to: 3 })
+    expect(h.current.lastBandChange?.at).toBeGreaterThanOrEqual(first!.at)
+  })
+
+  it('supplies copy when the backend sends none', () => {
+    vi.useFakeTimers()
+    const h = harness()
+    h.send({ type: 'band', from: 4, to: 3 })
+    vi.advanceTimersByTime(200)
+    expect(useToasts.getState().toasts[0].message).toBe('Easing off.')
+    vi.useRealTimers()
   })
 
   it('ignores a band frame with no target', () => {
+    vi.useFakeTimers()
     const h = harness()
     h.send({ type: 'band', from: 3 })
+    vi.advanceTimersByTime(500)
     expect(h.current.band).toBe(3)
+    expect(h.current.lastBandChange).toBeNull()
     expect(useToasts.getState().toasts).toHaveLength(0)
+    vi.useRealTimers()
+  })
+
+  it('dismisses the toast at t=4200', () => {
+    vi.useFakeTimers()
+    const h = harness()
+    h.send({ type: 'band', from: 3, to: 5 })
+    vi.advanceTimersByTime(BAND_ANNOUNCE_DELAY_MS)
+    expect(useToasts.getState().toasts).toHaveLength(1)
+
+    vi.advanceTimersByTime(TOAST_TTL_MS)
+    expect(useToasts.getState().toasts).toHaveLength(0)
+    vi.useRealTimers()
   })
 })
 

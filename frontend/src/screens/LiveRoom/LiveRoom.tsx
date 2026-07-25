@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { CornerDownLeft, Keyboard, Lightbulb, Mic, Square } from 'lucide-react'
 
+import { BandIndicator } from '../../components/band/BandIndicator'
 import { Orb, useAmplitude } from '../../components/orb'
 import { Button, ButtonGroup, Chip, Label, Panel, StatusLabel } from '../../components/primitives'
 import { BAND_NAMES, clampBand } from '../../lib/band'
@@ -149,10 +150,7 @@ export default function LiveRoom() {
         </span>
 
         <div className={s.headerRight}>
-          <span className={s.bandIndicator}>
-            <Label tone="quiet">BAND</Label>
-            <span className={s.bandNumeral}>{clampBand(session.band)}</span>
-          </span>
+          <BandIndicator band={session.band} changedAt={session.lastBandChange?.at} />
           <span
             className={`${s.timer} ${remaining < WARN_REMAINING_MS ? s.timerWarn : ''}`}
             title="Time remaining in this session"

@@ -86,24 +86,6 @@
   gap: var(--s-5);
 }
 
-/* The width axis broadens the numeral as difficulty rises (§5.2). `font` must
-   be set before font-variation-settings — the shorthand resets it. */
-.bandIndicator {
-  display: flex;
-  align-items: baseline;
-  gap: var(--s-2);
-}
-
-.bandNumeral {
-  font-family: var(--font-display);
-  font-size: 26px;
-  line-height: 1;
-  font-variation-settings:
-    'wdth' var(--band-width),
-    'wght' 700;
-  color: var(--bone);
-}
-
 .timer {
   font: var(--fs-mono-sm);
   letter-spacing: var(--tr-mono-sm);
