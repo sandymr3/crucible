@@ -1,0 +1,582 @@
+/**
+ * The home page (design PRD §7).
+ *
+ * The first thing a judge sees, with one job: make someone understand what this
+ * is and want to try it, in under fifteen seconds, without scrolling.
+ */
+
+.page {
+  --gutter: var(--s-18);
+  position: relative;
+}
+
+.shell {
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: 0 var(--s-6);
+}
+
+.section {
+  padding-block: var(--rhythm-section);
+}
+
+.sectionHead {
+  font: var(--fs-h1);
+  letter-spacing: var(--tr-h1);
+  color: var(--bone);
+  margin-bottom: var(--s-4);
+}
+
+.sectionLede {
+  font: var(--fs-body);
+  color: var(--ash);
+  max-width: 56ch;
+  margin-bottom: var(--s-10);
+}
+
+/* ── nav ─────────────────────────────────────────────────────────────── */
+
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  gap: var(--s-6);
+  background: transparent;
+  border-bottom: 1px solid transparent;
+  transition:
+    background var(--dur-base) var(--ease-out),
+    border-color var(--dur-base) var(--ease-out);
+}
+
+.navScrolled {
+  background: var(--vessel);
+  border-bottom-color: var(--rim);
+}
+
+.navInner {
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: 0 var(--s-6);
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--s-6);
+}
+
+.wordmark {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 19px;
+  font-variation-settings: 'wdth' 112;
+  color: var(--bone);
+}
+
+.mark {
+  width: 20px;
+  height: 20px;
+  border-radius: var(--r-full);
+  background: var(--t-ember);
+  box-shadow: 0 0 0 1px color-mix(in oklch, var(--t-ember) 50%, transparent);
+  flex: none;
+}
+
+.navRight {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+
+/* ── hero ────────────────────────────────────────────────────────────── */
+
+.hero {
+  min-height: min(100vh, 100dvh);
+  /* The CTA must clear the fold at 1280x800, the projector target. */
+  min-height: max(720px, min(100vh, 100dvh));
+  display: grid;
+  align-items: center;
+  padding-bottom: var(--s-24);
+}
+
+/* 12 columns, copy on 1-7 and the demo on 8-12. Asymmetric on purpose: a 6/6
+   split is the template answer and reads as a landing-page kit. */
+.heroGrid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: var(--s-6);
+  align-items: center;
+}
+
+.heroCopy {
+  grid-column: 1 / span 7;
+}
+
+.heroDemo {
+  grid-column: 8 / span 5;
+}
+
+.eyebrow {
+  display: block;
+  margin-bottom: var(--s-5);
+}
+
+.headline {
+  font: var(--fs-display);
+  letter-spacing: var(--tr-display);
+  color: var(--bone);
+  /* Forced breaks rather than arbitrary reflow — the line endings are part of
+     the reading rhythm. */
+  max-width: 11ch;
+}
+
+.subcopy {
+  font: var(--fs-body);
+  color: var(--ash);
+  max-width: 52ch;
+  margin-top: var(--s-6);
+}
+
+.ctaRow {
+  margin-top: var(--s-8);
+}
+
+.ctaNote {
+  display: block;
+  margin-top: var(--s-3);
+  color: var(--dust);
+  font: var(--fs-mono-sm);
+  letter-spacing: var(--tr-mono-sm);
+}
+
+/* ── hero demo card ──────────────────────────────────────────────────── */
+
+.demoCard {
+  background: var(--vessel);
+  border: 1px solid var(--rim);
+  border-radius: var(--r-panel);
+  padding: 28px;
+}
+
+.demoHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  padding-bottom: var(--s-3);
+  margin-bottom: var(--s-5);
+  border-bottom: 1px solid var(--rim);
+}
+
+.demoDot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--r-full);
+  background: var(--state-live);
+  animation: demo-pulse 1.4s var(--ease-in-out) infinite;
+}
+
+.demoDot[data-idle] {
+  animation: none;
+  background: var(--ash);
+}
+
+@keyframes demo-pulse {
+  50% {
+    opacity: 0.45;
+  }
+}
+
+.demoBody {
+  min-height: 210px;
+}
+
+/* ── card rows ───────────────────────────────────────────────────────── */
+
+.cards3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--s-6);
+}
+
+.cards4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--s-4);
+}
+
+.card {
+  position: relative;
+  background: var(--vessel);
+  border: 1px solid var(--rim);
+  border-radius: var(--r-panel);
+  padding: var(--s-8);
+  overflow: hidden;
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out);
+}
+
+/* A 1px top edge in the card's ramp colour. Deliberately NOT a lift: the
+   floating-card hover with a shadow bloom is a template gesture. */
+.card::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  background: var(--card-accent, var(--t-quench));
+  opacity: 0;
+  transition: opacity var(--dur-fast) var(--ease-out);
+}
+
+.card:hover {
+  border-color: var(--rim-lit);
+  background: var(--vessel-high);
+}
+
+.card:hover::before {
+  opacity: 1;
+}
+
+.cardNumber {
+  display: block;
+  font: var(--fs-mono-sm);
+  letter-spacing: var(--tr-label);
+  color: var(--dust);
+  margin-bottom: var(--s-5);
+}
+
+.cardIcon {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--r-control);
+  background: var(--vessel-high);
+  border: 1px solid var(--rim);
+  color: var(--card-accent, var(--t-quench));
+  margin-bottom: var(--s-5);
+}
+
+.cardTitle {
+  font: var(--fs-h2);
+  letter-spacing: var(--tr-h2);
+  color: var(--bone);
+}
+
+.cardBody {
+  font: var(--fs-body);
+  color: var(--ash);
+  max-width: 34ch;
+  margin-top: var(--s-3);
+}
+
+.cardFooter {
+  margin-top: var(--s-6);
+  padding-top: var(--s-6);
+  border-top: 1px solid var(--rim);
+}
+
+/* ── personas ────────────────────────────────────────────────────────── */
+
+.personaCard {
+  display: grid;
+  justify-items: center;
+  gap: var(--s-4);
+  text-align: center;
+  padding: var(--s-8) var(--s-6);
+}
+
+.personaCard:hover {
+  border-color: color-mix(in oklch, var(--card-accent) 30%, var(--rim));
+}
+
+.personaName {
+  font-size: 13px !important;
+  color: var(--card-accent) !important;
+}
+
+/* The serif ties these voices to the transcript their words will appear in. */
+.personaQuote {
+  font: var(--fs-quote);
+  font-style: italic;
+  color: var(--bone);
+  max-width: 22ch;
+}
+
+.punishes {
+  width: 100%;
+  margin-top: var(--s-4);
+  padding-top: var(--s-5);
+  border-top: 1px solid var(--rim);
+  display: grid;
+  gap: var(--s-2);
+}
+
+.punishesLabel {
+  color: color-mix(in oklch, var(--verdict-incorrect) 70%, transparent) !important;
+}
+
+.punishesBody {
+  font: var(--fs-small);
+  color: var(--ash);
+}
+
+/* ── verdict scale ───────────────────────────────────────────────────── */
+
+.verdictCard {
+  position: relative;
+  background: var(--vessel);
+  border: 1px solid var(--rim);
+  border-radius: var(--r-panel);
+  padding: var(--s-6);
+  display: grid;
+  gap: var(--s-4);
+  align-content: start;
+}
+
+.verdictRule {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3px;
+  border-radius: var(--r-panel) var(--r-panel) 0 0;
+  background: var(--card-accent);
+}
+
+.verdictName {
+  color: var(--card-accent) !important;
+  margin-top: var(--s-2);
+}
+
+.verdictDef {
+  font: var(--fs-small);
+  color: var(--ash);
+}
+
+.verdictExample {
+  font: var(--fs-quote);
+  color: var(--bone);
+}
+
+/* ── heat ladder ─────────────────────────────────────────────────────── */
+
+.ladder {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 2px;
+  margin-top: var(--s-8);
+}
+
+.ladderSegment {
+  display: grid;
+  gap: var(--s-3);
+}
+
+.ladderBar {
+  height: 56px;
+  background: var(--ladder-color);
+  border-radius: 2px;
+}
+
+.ladderSegment:first-child .ladderBar {
+  border-radius: var(--r-control) 2px 2px var(--r-control);
+}
+
+.ladderSegment:last-child .ladderBar {
+  border-radius: 2px var(--r-control) var(--r-control) 2px;
+}
+
+.ladderDesc {
+  font: var(--fs-small);
+  color: var(--ash);
+}
+
+.ladderQuote {
+  font: var(--fs-h3);
+  letter-spacing: var(--tr-h3);
+  color: var(--bone);
+  max-width: 44ch;
+}
+
+/* ── what you get back ───────────────────────────────────────────────── */
+
+.getBack {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: var(--s-6);
+}
+
+.previewPanel {
+  display: grid;
+  gap: var(--s-5);
+}
+
+.previewGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s-5);
+  align-items: center;
+}
+
+.roadmapDay {
+  display: grid;
+  gap: var(--s-3);
+  padding: var(--s-5);
+  border: 1px solid var(--rim);
+  border-radius: var(--r-control);
+  background: var(--vessel-high);
+}
+
+.roadmapLink {
+  font: var(--fs-small);
+  color: var(--t-cool);
+  text-decoration: none;
+}
+
+.roadmapLink:hover {
+  text-decoration: underline;
+}
+
+/* ── built on ────────────────────────────────────────────────────────── */
+
+.builtOn {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--s-8);
+  padding-block: var(--s-10);
+  border-top: 1px solid var(--rim);
+  border-bottom: 1px solid var(--rim);
+}
+
+.builtOnItem {
+  display: grid;
+  gap: var(--s-2);
+  align-content: start;
+}
+
+.builtOnName {
+  font: var(--fs-h3);
+  letter-spacing: var(--tr-h3);
+  color: var(--bone);
+}
+
+.builtOnDetail {
+  font: var(--fs-small);
+  color: var(--ash);
+}
+
+/* ── close and footer ────────────────────────────────────────────────── */
+
+.close {
+  display: grid;
+  justify-items: center;
+  gap: var(--s-6);
+  text-align: center;
+  padding-block: var(--rhythm-section);
+}
+
+.closeLine {
+  font: var(--fs-h1);
+  letter-spacing: var(--tr-h1);
+  color: var(--bone);
+  max-width: 20ch;
+}
+
+.footer {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  gap: var(--s-5);
+  border-top: 1px solid var(--rim);
+}
+
+.footerRight {
+  margin-left: auto;
+  display: flex;
+  gap: var(--s-5);
+}
+
+.footerLink {
+  font: var(--fs-small);
+  color: var(--ash);
+  text-decoration: none;
+}
+
+.footerLink:hover {
+  color: var(--bone);
+}
+
+/* ── scroll reveal ───────────────────────────────────────────────────── */
+
+/* The ONLY scroll animation on the page. */
+.reveal {
+  opacity: 0;
+  transform: translate3d(0, 16px, 0);
+  transition:
+    opacity 400ms var(--ease-out),
+    transform 400ms var(--ease-out);
+}
+
+.revealIn {
+  opacity: 1;
+  transform: none;
+}
+
+/* ── responsive (§7.10) ──────────────────────────────────────────────── */
+
+@media (max-width: 1199px) {
+  .heroCopy {
+    grid-column: 1 / -1;
+  }
+  .heroDemo {
+    grid-column: 1 / -1;
+  }
+  .cards4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .getBack {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 899px) {
+  .page {
+    --rhythm-section: var(--s-18);
+  }
+  .section {
+    padding-block: var(--s-18);
+  }
+  .headline {
+    font-size: 44px;
+    max-width: 16ch;
+  }
+  .cards3,
+  .cards4,
+  .builtOn {
+    grid-template-columns: 1fr;
+  }
+  /* Rotated to vertical, so five segments still read on a narrow screen. */
+  .ladder {
+    grid-template-columns: 1fr;
+    gap: var(--s-4);
+  }
+  .ladderBar {
+    height: 12px;
+    border-radius: 2px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .demoDot {
+    animation: none;
+  }
+}

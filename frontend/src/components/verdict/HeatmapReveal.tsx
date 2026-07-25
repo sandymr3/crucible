@@ -18,6 +18,17 @@ interface HeatmapRevealProps {
   revealKey?: string | number
   /** False for already-settled turns, e.g. the report's per-turn accordion. */
   animate?: boolean
+  /**
+   * Held plain for this long before the first span lights. The home page's hero
+   * shows the sentence unmarked for 1.4s so a visitor reads it as speech before
+   * watching it get graded.
+   */
+  startDelayMs?: number
+  /**
+   * Shows a span's explanation without hover. Used by the hero, which has to
+   * perform the whole interaction on its own.
+   */
+  pinnedSpan?: number | null
 }
 
 interface Anchor {
@@ -32,7 +43,14 @@ interface Anchor {
  * The single most screenshot-able frame in the product, and the same component
  * the home page's hero demo uses.
  */
-export function HeatmapReveal({ text, ranges, revealKey, animate = true }: HeatmapRevealProps) {
+export function HeatmapReveal({
+  text,
+  ranges,
+  revealKey,
+  animate = true,
+  startDelayMs = 0,
+  pinnedSpan = null,
+}: HeatmapRevealProps) {
   const segments = useMemo(() => segmentByRanges(text, ranges), [text, ranges])
   const spanCount = segments.filter((seg) => seg.kind === 'span').length
 
@@ -50,9 +68,12 @@ export function HeatmapReveal({ text, ranges, revealKey, animate = true }: Heatm
       return
     }
     setRevealing(true)
-    const timer = setTimeout(() => setRevealing(false), revealDuration(spanCount) + 60)
+    const timer = setTimeout(
+      () => setRevealing(false),
+      startDelayMs + revealDuration(spanCount) + 60,
+    )
     return () => clearTimeout(timer)
-  }, [animate, spanCount, revealKey])
+  }, [animate, spanCount, revealKey, startDelayMs])
 
   // Hovering a span moves the popover, so the layer is measured rather than
   // nested — an inline element that wraps across lines cannot host an
@@ -84,10 +105,13 @@ export function HeatmapReveal({ text, ranges, revealKey, animate = true }: Heatm
     return () => window.removeEventListener('keydown', onKey)
   }, [anchor, hide])
 
+  // A pinned span wins over hover, so the hero's scripted popover cannot be
+  // dismissed by a stray pointer crossing the card.
+  const shownIndex = pinnedSpan ?? anchor?.index ?? null
   const active =
-    anchor === null
+    shownIndex === null
       ? null
-      : (segments.find((seg) => seg.kind === 'span' && seg.index === anchor.index) ?? null)
+      : (segments.find((seg) => seg.kind === 'span' && seg.index === shownIndex) ?? null)
 
   return (
     <div className={s.surface} ref={surfaceRef}>
@@ -100,7 +124,7 @@ export function HeatmapReveal({ text, ranges, revealKey, animate = true }: Heatm
             verdict={segment.span.verdict}
             concept={segment.span.concept}
             revealing={revealing}
-            delay={segment.index * SPAN_STAGGER_MS}
+            delay={startDelayMs + segment.index * SPAN_STAGGER_MS}
             onMouseEnter={(e) => showFor(segment.index, e.currentTarget)}
             onMouseLeave={hide}
             onFocus={(e) => showFor(segment.index, e.currentTarget)}

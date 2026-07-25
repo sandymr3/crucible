@@ -73,6 +73,9 @@
     var(--bone) 38px,
     var(--bone) 39px
   );
+  /* #000 is a mask value, not a palette colour: in a mask, opaque black means
+     "keep these pixels". Substituting a design token here would change what is
+     masked rather than what is coloured. */
   mask-image: radial-gradient(75% 75% at 50% 50%, #000 0%, transparent 88%);
 }
 

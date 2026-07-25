@@ -3,6 +3,7 @@ import { Route, Routes } from 'react-router-dom'
 import { ToastHost } from './components/primitives'
 import { ThermalField } from './components/thermal/ThermalField'
 import Dev from './screens/Dev/Dev'
+import Home from './screens/Home/Home'
 import LiveRoom from './screens/LiveRoom/LiveRoom'
 
 /**
@@ -21,7 +22,10 @@ export default function App() {
           context, so this is the only z-index the app needs. */}
       <div style={{ position: 'relative', zIndex: 1 }}>
         <Routes>
-          <Route path="/" element={<Placeholder name="Home" />} />
+          <Route path="/" element={<Home />} />
+          {/* The setup flow lands in a later step; the entry route exists now so
+              the home page's CTA is not a dead link. */}
+          <Route path="/setup" element={<Placeholder name="Setup" />} />
           <Route path="/setup/:id" element={<Placeholder name="Setup" />} />
           <Route path="/setup/:id/digest" element={<Placeholder name="Digest" />} />
           <Route path="/setup/:id/persona" element={<Placeholder name="Persona" />} />

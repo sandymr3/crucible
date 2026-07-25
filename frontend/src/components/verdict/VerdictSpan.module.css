@@ -30,6 +30,15 @@
   inherits: false;
   initial-value: 12;
 }
+/* The glyph fades WITH the span rather than being there from the start. It
+   still occupies its space throughout, so the sentence never reflows when the
+   reveal begins — which is what lets the home page's hero show a genuinely
+   plain sentence before grading and the identical component after. */
+@property --span-glyph {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: 1;
+}
 
 .span {
   --verdict-color: var(--ash);
@@ -77,6 +86,7 @@
   margin-left: 2px;
   color: var(--verdict-color);
   user-select: none;
+  opacity: var(--span-glyph);
 }
 
 .span[data-verdict='validated'] {
@@ -108,10 +118,12 @@
   from {
     --span-draw: 0%;
     --span-fill: 0;
+    --span-glyph: 0;
   }
   to {
     --span-draw: 100%;
     --span-fill: 12;
+    --span-glyph: 1;
   }
 }
 
