@@ -1,0 +1,481 @@
+/**
+ * The report and the roadmap.
+ *
+ * These scroll, unlike the Live Room. They are read rather than watched, and
+ * the 90/10 rule still holds: colour lives in the data marks and the verdict
+ * spans, never behind reading text.
+ */
+
+.page {
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: var(--s-8) var(--s-6) var(--s-24);
+  display: grid;
+  gap: var(--s-6);
+}
+
+.header {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--s-5);
+  flex-wrap: wrap;
+  padding-bottom: var(--s-5);
+  border-bottom: 1px solid var(--rim);
+}
+
+.title {
+  font: var(--fs-h1);
+  letter-spacing: var(--tr-h1);
+  color: var(--bone);
+}
+
+.headerRight {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);
+}
+
+.overall {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-2);
+}
+
+.overallValue {
+  font: var(--fs-metric);
+  letter-spacing: var(--tr-metric);
+  color: var(--bone);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── waiting and empty states ────────────────────────────────────────── */
+
+.waiting {
+  display: grid;
+  justify-items: center;
+  gap: var(--s-5);
+  padding: var(--s-24) var(--s-6);
+  text-align: center;
+}
+
+.waitingTitle {
+  font: var(--fs-h2);
+  letter-spacing: var(--tr-h2);
+  color: var(--bone);
+}
+
+.waitingBody {
+  font: var(--fs-body);
+  color: var(--ash);
+  max-width: 46ch;
+}
+
+.spinner {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--r-full);
+  border: 2px solid var(--rim);
+  border-top-color: var(--heat-hot);
+  animation: spin 900ms linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ── layout ──────────────────────────────────────────────────────────── */
+
+.topGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s-6);
+  align-items: start;
+}
+
+.scoreGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s-6);
+  align-items: center;
+}
+
+.dimensions {
+  display: grid;
+  gap: var(--s-4);
+}
+
+.dimension {
+  display: grid;
+  gap: var(--s-2);
+}
+
+.dimensionHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.dimensionValue {
+  font: var(--fs-mono-sm);
+  letter-spacing: var(--tr-mono-sm);
+  color: var(--bone);
+  font-variant-numeric: tabular-nums;
+}
+
+.meter {
+  height: 5px;
+  border-radius: var(--r-full);
+  background: var(--rim);
+  overflow: hidden;
+}
+
+.meterFill {
+  height: 100%;
+  border-radius: var(--r-full);
+  background: var(--t-warm);
+}
+
+.lists {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s-6);
+}
+
+.list {
+  display: grid;
+  gap: var(--s-3);
+  align-content: start;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.listItem {
+  display: flex;
+  gap: var(--s-3);
+  align-items: baseline;
+  font: var(--fs-body);
+  color: var(--bone);
+}
+
+.listGlyph {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--list-accent);
+  flex: none;
+}
+
+/* ── delivery ────────────────────────────────────────────────────────── */
+
+.deliveryGrid {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: var(--s-6);
+  align-items: center;
+}
+
+.deliveryStats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(112px, 1fr));
+  gap: var(--s-4);
+}
+
+.stat {
+  display: grid;
+  gap: var(--s-1);
+}
+
+.statValue {
+  font: var(--fs-metric);
+  font-size: 24px;
+  letter-spacing: var(--tr-metric);
+  color: var(--bone);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Secondary on purpose: a rate extrapolated from a fifteen-second answer is
+   arithmetically correct and misleading, so the raw count leads. */
+.statSecondary {
+  font: var(--fs-mono-sm);
+  letter-spacing: var(--tr-mono-sm);
+  color: var(--dust);
+}
+
+.observation {
+  margin-top: var(--s-5);
+  padding-top: var(--s-5);
+  border-top: 1px solid var(--rim);
+  display: grid;
+  gap: var(--s-2);
+}
+
+.observationText {
+  font: var(--fs-body);
+  color: var(--bone);
+}
+
+.drill {
+  font: var(--fs-small);
+  color: var(--ash);
+}
+
+/* ── turn accordion ──────────────────────────────────────────────────── */
+
+.turns {
+  display: grid;
+  gap: var(--s-3);
+}
+
+.turn {
+  border: 1px solid var(--rim);
+  border-radius: var(--r-panel);
+  background: var(--vessel);
+  overflow: hidden;
+}
+
+.turnHead {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);
+  padding: var(--s-5);
+  text-align: left;
+  transition: background var(--dur-fast) var(--ease-out);
+}
+
+.turnHead:hover {
+  background: var(--vessel-high);
+}
+
+.turnIndex {
+  font: var(--fs-mono-sm);
+  letter-spacing: var(--tr-mono-sm);
+  color: var(--dust);
+  flex: none;
+}
+
+.turnQuestion {
+  font: var(--fs-body);
+  color: var(--bone);
+  flex: 1;
+  min-width: 0;
+}
+
+.turnMeta {
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);
+  flex: none;
+}
+
+.turnScore {
+  font: var(--fs-mono-sm);
+  letter-spacing: var(--tr-mono-sm);
+  color: var(--bone);
+  font-variant-numeric: tabular-nums;
+}
+
+.spanCounts {
+  display: flex;
+  gap: var(--s-2);
+}
+
+.spanCount {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--count-accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.turnBody {
+  padding: 0 var(--s-5) var(--s-6);
+  display: grid;
+  gap: var(--s-5);
+  border-top: 1px solid var(--rim);
+  padding-top: var(--s-5);
+}
+
+.quoted {
+  font: var(--fs-quote);
+  letter-spacing: var(--tr-quote);
+  color: var(--bone);
+  max-width: 68ch;
+}
+
+.summary {
+  font: var(--fs-body);
+  color: var(--ash);
+  max-width: 68ch;
+}
+
+.outline {
+  margin: 0;
+  padding-left: var(--s-5);
+  display: grid;
+  gap: var(--s-2);
+  font: var(--fs-small);
+  color: var(--ash);
+  max-width: 68ch;
+}
+
+.scoreRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-6);
+}
+
+.scorePill {
+  display: grid;
+  gap: var(--s-1);
+}
+
+/* ── roadmap ─────────────────────────────────────────────────────────── */
+
+.days {
+  display: grid;
+  gap: var(--s-4);
+}
+
+.day {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  gap: var(--s-6);
+  padding: var(--s-6);
+  border: 1px solid var(--rim);
+  border-radius: var(--r-panel);
+  background: var(--vessel);
+}
+
+.dayNumber {
+  display: grid;
+  gap: var(--s-1);
+  align-content: start;
+}
+
+.dayNumeral {
+  font-family: var(--font-display);
+  font-size: 38px;
+  line-height: 1;
+  font-variation-settings: 'wdth' 112, 'wght' 700;
+  color: var(--bone);
+  font-variant-numeric: tabular-nums;
+}
+
+.dayBody {
+  display: grid;
+  gap: var(--s-4);
+  min-width: 0;
+}
+
+.dayConcept {
+  font: var(--fs-h3);
+  letter-spacing: var(--tr-h3);
+  color: var(--bone);
+}
+
+.dayWhy {
+  font: var(--fs-body);
+  color: var(--ash);
+  max-width: 68ch;
+}
+
+.resources {
+  display: grid;
+  gap: var(--s-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.resource {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-3);
+  min-width: 0;
+}
+
+.resourceLink {
+  color: var(--t-cool);
+  font: var(--fs-small);
+  text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.resourceLink:hover {
+  text-decoration: underline;
+}
+
+.resourceMeta {
+  font: var(--fs-mono-sm);
+  letter-spacing: var(--tr-mono-sm);
+  color: var(--dust);
+  flex: none;
+}
+
+.task {
+  display: grid;
+  gap: var(--s-2);
+  padding: var(--s-4);
+  border: 1px solid var(--rim);
+  border-radius: var(--r-control);
+  background: var(--vessel-high);
+}
+
+.taskText {
+  font: var(--fs-small);
+  color: var(--bone);
+}
+
+.note {
+  padding: var(--s-4) var(--s-5);
+  border: 1px solid color-mix(in oklch, var(--t-warm) 35%, var(--rim));
+  border-radius: var(--r-control);
+  background: color-mix(in oklch, var(--t-warm) 8%, var(--vessel));
+  font: var(--fs-small);
+  color: var(--bone);
+}
+
+.retest {
+  display: grid;
+  justify-items: center;
+  gap: var(--s-4);
+  text-align: center;
+  padding: var(--s-10) var(--s-6);
+  border: 1px solid var(--rim);
+  border-radius: var(--r-panel);
+  background: var(--vessel);
+}
+
+.retestLine {
+  font: var(--fs-h2);
+  letter-spacing: var(--tr-h2);
+  color: var(--bone);
+  max-width: 30ch;
+}
+
+@media (max-width: 899px) {
+  .topGrid,
+  .lists,
+  .scoreGrid {
+    grid-template-columns: 1fr;
+  }
+  .deliveryGrid {
+    grid-template-columns: 1fr;
+  }
+  .day {
+    grid-template-columns: 1fr;
+    gap: var(--s-4);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation-duration: 3s;
+  }
+}

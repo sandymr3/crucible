@@ -5,6 +5,8 @@ import { ThermalField } from './components/thermal/ThermalField'
 import Dev from './screens/Dev/Dev'
 import Home from './screens/Home/Home'
 import LiveRoom from './screens/LiveRoom/LiveRoom'
+import Report from './screens/Report/Report'
+import Roadmap from './screens/Roadmap/Roadmap'
 
 /**
  * Route map from the screen spec. Screens land one per build step; until then a
@@ -31,8 +33,8 @@ export default function App() {
           <Route path="/setup/:id/persona" element={<Placeholder name="Persona" />} />
           <Route path="/setup/:id/plan" element={<Placeholder name="Plan" />} />
           <Route path="/room/:id" element={<LiveRoom />} />
-          <Route path="/report/:id" element={<Placeholder name="Report" />} />
-          <Route path="/roadmap/:id" element={<Placeholder name="Roadmap" />} />
+          <Route path="/report/:id" element={<Report />} />
+          <Route path="/roadmap/:id" element={<Roadmap />} />
           <Route path="/study/:id" element={<Placeholder name="Study" />} />
           <Route path="/history" element={<Placeholder name="History" />} />
           {import.meta.env.DEV && <Route path="/dev" element={<Dev />} />}
