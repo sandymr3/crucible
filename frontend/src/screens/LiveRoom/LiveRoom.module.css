@@ -305,6 +305,29 @@
   color: var(--dust);
 }
 
+/* ── evaluation rail ─────────────────────────────────────────────────── */
+
+.progressTrack {
+  height: 6px;
+  border-radius: var(--r-full);
+  background: var(--rim);
+  overflow: hidden;
+  margin-bottom: var(--s-3);
+}
+
+.progressFill {
+  height: 100%;
+  border-radius: var(--r-full);
+  background: var(--heat-hot);
+  transition: width var(--dur-base) var(--ease-out);
+}
+
+.conceptGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+
 /* ── status bar ──────────────────────────────────────────────────────── */
 
 .statusBar {

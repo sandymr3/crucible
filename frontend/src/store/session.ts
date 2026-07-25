@@ -76,6 +76,12 @@ interface SessionState {
   band: number
   /** Drives the flare sweep. `at` changes on every promotion or demotion. */
   lastBandChange: { from: number; to: number; at: number } | null
+  /**
+   * Every band the session has occupied, in order. Accumulated client-side:
+   * the session document's bandHistory is written by the grader and is not
+   * pushed back down the socket.
+   */
+  bandTrajectory: number[]
   hintsUsed: number
 
   usage: { totalTokens: number; audioIn: number; audioOut: number }
@@ -117,7 +123,14 @@ let socket: LiveSocket | null = null
 /** The backend's hard cap. There is no warning frame, so the client tracks it. */
 export const SESSION_MAX_MS = 12 * 60 * 1000
 
-const initial = {
+/**
+ * Every non-action field, at rest.
+ *
+ * Exported so tests build their harness from the real shape rather than
+ * hand-listing fields — a hand-built copy silently drifts every time a field is
+ * added, and the failure surfaces as an unrelated crash inside a reducer.
+ */
+export const initialSessionState = {
   sessionId: null,
   session: null,
   mode: null,
@@ -128,6 +141,7 @@ const initial = {
   turns: [],
   band: 3,
   lastBandChange: null,
+  bandTrajectory: [],
   hintsUsed: 0,
   usage: { totalTokens: 0, audioIn: 0, audioOut: 0 },
   socketStats: null,
@@ -139,10 +153,10 @@ const initial = {
 } satisfies Partial<SessionState>
 
 export const useSession = create<SessionState>((set, get) => ({
-  ...initial,
+  ...initialSessionState,
 
   async start(sessionId) {
-    set({ ...initial, sessionId, connection: 'connecting' })
+    set({ ...initialSessionState, sessionId, connection: 'connecting' })
 
     try {
       const session = await api.getSession(sessionId)
@@ -153,6 +167,7 @@ export const useSession = create<SessionState>((set, get) => ({
         mode: session.mode,
         persona: session.persona ?? null,
         band,
+        bandTrajectory: [band],
         turns: [emptyTurn(0, band)],
       })
 
@@ -262,7 +277,7 @@ export const useSession = create<SessionState>((set, get) => ({
 
   reset() {
     void teardown()
-    set({ ...initial })
+    set({ ...initialSessionState })
   },
 }))
 
@@ -480,7 +495,11 @@ function handleBand(frame: ServerFrame, set: Setter, get: Getter) {
   // t=0 — the room begins moving. One attribute write drives the 1800ms
   // thermal transition and the 900ms width axis at once.
   setBand(to)
-  set({ band: to, lastBandChange: { from, to, at: Date.now() } })
+  set({
+    band: to,
+    lastBandChange: { from, to, at: Date.now() },
+    bandTrajectory: [...get().bandTrajectory, to],
+  })
 
   // t=120 — the explanation follows the room rather than arriving with it,
   // which is what makes the change read as a consequence rather than a

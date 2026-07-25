@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { ServerFrame } from '../lib/protocol'
 import { BAND_ANNOUNCE_DELAY_MS } from '../lib/reveal'
 import type { Evaluation, Span } from '../lib/types'
-import { emptyTurn, handleFrame, type LiveTurn } from './session'
+import { emptyTurn, handleFrame, initialSessionState, type LiveTurn } from './session'
 import { TOAST_TTL_MS, useToasts } from './toasts'
 
 /**
@@ -14,17 +14,12 @@ import { TOAST_TTL_MS, useToasts } from './toasts'
  * silently if handled wrongly.
  */
 function harness(turns: LiveTurn[] = [emptyTurn(0, 3)]) {
+  // Built from the store's own initial state rather than hand-listed, so
+  // adding a field cannot silently leave the harness behind — which surfaces
+  // as an unrelated crash inside whichever reducer touches it first.
   let state = {
+    ...initialSessionState,
     turns,
-    band: 3,
-    lastBandChange: null,
-    state: 'CONNECTING',
-    hintsUsed: 0,
-    usage: { totalTokens: 0, audioIn: 0, audioOut: 0 },
-    error: null,
-    connectionLost: false,
-    micHot: false,
-    ending: false,
   } as unknown as ReturnType<Parameters<typeof handleFrame>[2]>
 
   const set = (partial: object) => {

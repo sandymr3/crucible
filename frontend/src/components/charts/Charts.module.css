@@ -1,0 +1,128 @@
+/**
+ * Three visualisations that must read as ONE system (design PRD §9.3).
+ *
+ * Shared stylesheet on purpose: the grid weight, the label treatment and the
+ * stroke widths are what make a radar, a sparkline and a dial look like
+ * readings from the same instrument rather than three libraries.
+ */
+
+.chart {
+  display: block;
+  width: 100%;
+  overflow: visible;
+}
+
+/* ── shared marks ────────────────────────────────────────────────────── */
+
+.grid {
+  fill: none;
+  stroke: var(--rim);
+  stroke-width: 1;
+}
+
+.axisLabel {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  fill: var(--dust);
+}
+
+/* ── radar ───────────────────────────────────────────────────────────── */
+
+.radarArea {
+  fill: color-mix(in oklch, var(--t-warm) 14%, transparent);
+  stroke: var(--t-warm);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  transition: d var(--dur-base) var(--ease-out);
+}
+
+.radarVertex {
+  fill: var(--t-warm);
+}
+
+/* ── sparkline ───────────────────────────────────────────────────────── */
+
+.sparkBaseline {
+  stroke: var(--rim);
+  stroke-width: 1;
+}
+
+/* Each segment is stroked by the band it climbs to, so the line itself warms
+   left to right. That is the thermal ramp doing a fourth job, and it is what
+   ties the report back to the room. */
+.sparkSegment {
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.sparkNode {
+  stroke: var(--void);
+  stroke-width: 1.5;
+}
+
+/* ── pace dial ───────────────────────────────────────────────────────── */
+
+.dialTrack {
+  fill: none;
+  stroke: var(--rim);
+  stroke-width: 8;
+  stroke-linecap: round;
+}
+
+/* The zone is guidance, not a grade: optimal pace is context-dependent, and a
+   system-design walkthrough should be slower than a behavioural story. */
+.dialZone {
+  fill: none;
+  stroke: color-mix(in oklch, var(--verdict-validated) 20%, transparent);
+  stroke-width: 8;
+  stroke-linecap: butt;
+}
+
+.dialNeedle {
+  stroke: var(--bone);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.dialValue {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 26px;
+  letter-spacing: var(--tr-metric);
+  fill: var(--bone);
+  text-anchor: middle;
+  font-variant-numeric: tabular-nums;
+}
+
+.dialUnit {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  fill: var(--ash);
+  text-anchor: middle;
+}
+
+/* ── empty states ────────────────────────────────────────────────────── */
+
+/* A radar under three graded turns is flat BY DESIGN, and a flat shape looks
+   like a bug rather than like "not enough data yet". Say so instead. */
+.empty {
+  display: grid;
+  place-items: center;
+  min-height: 140px;
+  padding: var(--s-5);
+  text-align: center;
+  color: var(--dust);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .radarArea {
+    transition: none;
+  }
+}

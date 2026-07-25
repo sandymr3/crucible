@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Lightbulb, CornerDownLeft, Keyboard, Square } from 'lucide-react'
 
 import { BandIndicator } from '../../components/band/BandIndicator'
+import { BandSparkline, PaceDial, Radar } from '../../components/charts'
 import { Orb, useAmplitude } from '../../components/orb'
 import * as api from '../../lib/api'
 import { PERSONA_FALLBACK_NAME, PERSONA_IDS, type PersonaId } from '../../lib/persona'
@@ -273,6 +274,39 @@ export default function Dev() {
           </Button>
         </div>
         {probe && <pre className={s.probe}>{probe}</pre>}
+      </section>
+
+      <section className={s.section}>
+        <h2 className={s.sectionHead}>Charts</h2>
+        <div className={s.ramp}>
+          <Panel title="Score matrix">
+            <Radar
+              axes={[
+                { label: 'Accuracy', value: 7.4 },
+                { label: 'Depth', value: 5.1 },
+                { label: 'Structure', value: 8.2 },
+                { label: 'Clarity', value: 6.3 },
+              ]}
+              turnsGraded={4}
+              size={210}
+            />
+          </Panel>
+          <Panel title="Score matrix · under 3 turns">
+            <Radar axes={[]} turnsGraded={1} size={210} />
+          </Panel>
+          <Panel title="Difficulty">
+            <BandSparkline trajectory={[3, 3, 4, 4, 5, 4]} />
+          </Panel>
+          <Panel title="Pace">
+            <PaceDial wpm={128} band="optimal" />
+          </Panel>
+          <Panel title="Pace · hesitant">
+            <PaceDial wpm={92} band="hesitant" />
+          </Panel>
+          <Panel title="Pace · too fast">
+            <PaceDial wpm={205} band="too fast" />
+          </Panel>
+        </div>
       </section>
 
       <section className={s.section}>

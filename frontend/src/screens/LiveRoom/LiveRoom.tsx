@@ -4,12 +4,12 @@ import { CornerDownLeft, Keyboard, Lightbulb, Mic, Square } from 'lucide-react'
 
 import { BandIndicator } from '../../components/band/BandIndicator'
 import { Orb, useAmplitude } from '../../components/orb'
-import { Button, ButtonGroup, Chip, Label, Panel, StatusLabel } from '../../components/primitives'
+import { Button, ButtonGroup, Label, Panel, StatusLabel } from '../../components/primitives'
 import { BAND_NAMES, clampBand } from '../../lib/band'
 import { PERSONA_FALLBACK_NAME } from '../../lib/persona'
 import type { LiveState } from '../../lib/protocol'
-import { asVerdict, type Verdict } from '../../lib/verdict'
 import { canContinueInText, SESSION_MAX_MS, useSession } from '../../store/session'
+import { EvaluationRail } from './EvaluationRail'
 import { Transcript } from './Transcript'
 import s from './LiveRoom.module.css'
 
@@ -119,18 +119,13 @@ export default function LiveRoom() {
   const signature = SIGNATURE[session.state]
   const textStillWorks = canContinueInText(session)
 
-  const concepts = useMemo(() => {
-    // Last verdict wins: a concept re-approached from another angle should show
-    // where the candidate ended up, not where they started.
-    const seen = new Map<string, Verdict>()
-    for (const turn of session.turns) {
-      for (const span of turn.evaluation?.spans ?? []) {
-        const verdict = asVerdict(span.verdict)
-        if (verdict && span.concept) seen.set(span.concept, verdict)
-      }
-    }
-    return [...seen.entries()]
-  }, [session.turns])
+  // How many question areas the interview plans to cover, for the progress
+  // readout. Undropped areas only — a dropped one will never be asked.
+  const plannedAreas = useMemo(() => {
+    const plan = session.session?.digest?.interview_plan
+    if (!Array.isArray(plan)) return 6
+    return plan.filter((area) => !(area as { dropped?: boolean })?.dropped).length || 6
+  }, [session.session])
 
   async function finish() {
     setConfirmEnd(false)
@@ -280,37 +275,11 @@ export default function LiveRoom() {
       </main>
 
       <aside className={s.rightRail}>
-        <Panel title="Progress">
-          <Label tone="loud">
-            {closedTurns} answered
-          </Label>
-        </Panel>
-
-        <Panel title="Score matrix">
-          <Label tone="quiet">
-            {closedTurns < 3
-              ? `Needs ${3 - closedTurns} more answers`
-              : 'Charts land in the next step'}
-          </Label>
-        </Panel>
-
-        <Panel title="Delivery">
-          <Label tone="quiet">Measured from your answer audio after the session</Label>
-        </Panel>
-
-        <Panel title="Concept heatmap">
-          {concepts.length === 0 ? (
-            <Label tone="quiet">Concepts appear as answers are graded</Label>
-          ) : (
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--s-2)' }}>
-              {concepts.map(([concept, verdict]) => (
-                <Chip key={concept} tone={verdict} wrap>
-                  {concept}
-                </Chip>
-              ))}
-            </div>
-          )}
-        </Panel>
+        <EvaluationRail
+          turns={session.turns}
+          bandTrajectory={session.bandTrajectory}
+          plannedAreas={plannedAreas}
+        />
       </aside>
 
       <footer className={s.statusBar}>
