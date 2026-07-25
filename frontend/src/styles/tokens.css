@@ -15,6 +15,37 @@
  * never appears behind reading text.
  */
 
+/**
+ * Registering the ambient properties makes them genuinely interpolatable.
+ *
+ * An unregistered custom property is a token stream, so it can only ever flip
+ * between values — the thermal shift would snap rather than travel. Registering
+ * them as <color> and <number> lets the transition on :root below animate them
+ * directly, and every gradient and font axis that reads them follows
+ * continuously. This is why the blooms carry no `transition: background` of
+ * their own: one mechanism, not two fighting.
+ */
+@property --heat-cold {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #17e0c4;
+}
+@property --heat-hot {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #2e9bf0;
+}
+@property --heat-alpha {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0.16;
+}
+@property --band-width {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 112;
+}
+
 :root {
   /* ── structure — the 90% ──────────────────────────────────────────────
      A blue-black, not a neutral black. Neutral black next to warm accents
@@ -148,6 +179,28 @@
      NO glassmorphism — backdrop-filter is the strongest current AI tell.  */
   --shadow-float:
     0 16px 48px -12px rgb(0 0 0 / 0.7), 0 0 0 1px var(--rim);
+}
+
+/**
+ * The thermal shift itself. 1800ms for hue and intensity, 900ms for the width
+ * axis — the same event on two channels, the second landing first.
+ */
+:root {
+  transition:
+    --heat-cold var(--dur-heat) var(--ease-out),
+    --heat-hot var(--dur-heat) var(--ease-out),
+    --heat-alpha var(--dur-heat) var(--ease-out),
+    --band-width 900ms var(--ease-out);
+}
+
+/**
+ * The band transition is information, not decoration, so reduced motion
+ * shortens it rather than removing it (§4.5).
+ */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    transition-duration: 400ms;
+  }
 }
 
 /**

@@ -1,0 +1,108 @@
+/**
+ * Five stacked layers on one fixed element (design PRD §4).
+ *
+ *   5  vignette    radial, edges -> --void
+ *   4  grain       feTurbulence at 3.5%, overlay blend
+ *   3  isotherms   contour rings at 2.5% — the "thermal" tell
+ *   2  blooms      two radial gradients, band-driven hue
+ *   1  base        flat --void
+ *
+ * Two blooms only. Three or more becomes soup.
+ */
+
+.field {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: var(--void);
+  overflow: hidden;
+  contain: strict;
+}
+
+/* Layer 2 — the blooms.
+   The percentages scale with --heat-alpha so band 5 feels perceptibly closer,
+   not merely differently hued. The multipliers reproduce the spec's 22% / 18%
+   at the default alpha of 0.16 while keeping the cold bloom the stronger of
+   the two.
+   No transition here: --heat-cold / --heat-hot / --heat-alpha are registered
+   in tokens.css and animate themselves. */
+.field::before {
+  content: '';
+  position: absolute;
+  inset: -20%; /* overscan, so drift never reveals an edge */
+  background:
+    radial-gradient(
+      42% 38% at 18% 12%,
+      color-mix(in oklch, var(--heat-cold) calc(var(--heat-alpha) * 137%), transparent) 0%,
+      transparent 68%
+    ),
+    radial-gradient(
+      48% 44% at 84% 88%,
+      color-mix(in oklch, var(--heat-hot) calc(var(--heat-alpha) * 112%), transparent) 0%,
+      transparent 70%
+    );
+  filter: blur(64px);
+  animation: drift 84s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+@keyframes drift {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(2.5%, -2%, 0) scale(1.06);
+  }
+}
+
+/* Layer 3 — the isotherms. The detail that converts "gradient blob" into
+   "thermal imaging". Origin matches the cold bloom so the survey reads as a
+   reading OF that heat source.
+   Keep opacity between 0.02 and 0.03: above 0.04 it reads as a moire artefact
+   and looks like a rendering bug; below 0.015 it vanishes on a projector. */
+.field::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.025;
+  background-image: repeating-radial-gradient(
+    circle at 18% 12%,
+    transparent 0px,
+    transparent 38px,
+    var(--bone) 38px,
+    var(--bone) 39px
+  );
+  mask-image: radial-gradient(75% 75% at 50% 50%, #000 0%, transparent 88%);
+}
+
+/* Layer 4 — grain. Smooth gradients are the fingerprint of generated work;
+   film grain is the fingerprint of something art-directed. Static, never
+   animated: animated grain is distracting and costs frames the audio worklet
+   needs. */
+.grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.035;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Layer 5 — vignette. Tightens the room; at high bands it is what makes the
+   space feel close. */
+.vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    120% 100% at 50% 50%,
+    transparent 38%,
+    color-mix(in oklch, var(--void) 55%, transparent) 78%,
+    var(--void) 100%
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .field::before {
+    animation: none;
+  }
+}
