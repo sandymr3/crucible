@@ -13,13 +13,23 @@
 html {
   -webkit-text-size-adjust: 100%;
   color-scheme: dark;
+  background: var(--void);
 }
 
 body {
   min-height: 100dvh;
-  line-height: 1.5;
+  background: var(--void);
+  color: var(--bone);
+  font: var(--fs-body);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+}
+
+/* Visible keyboard focus is a hard requirement, not a nicety (§12). */
+:focus-visible {
+  outline: 2px solid var(--t-quench);
+  outline-offset: 2px;
+  border-radius: var(--r-tag);
 }
 
 img,
