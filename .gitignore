@@ -29,11 +29,13 @@ vendor/
 *.test
 coverage.*
 
-# --- Deck: generated output. The generator and facts are committed; the
-#     downloaded logos, the PowerPoint renders and node_modules are not. ---
+# --- Deck (documentation/deck): generated output. The generator and facts are
+#     committed; the downloaded logos, PowerPoint renders and node_modules are
+#     not. The .pptx itself IS committed — it is a submission artifact. ---
 node_modules/
-deck/assets/
-deck/render/
+documentation/deck/assets/
+documentation/deck/render/
+~$*.pptx
 
 # --- Editor / OS ---
 .DS_Store

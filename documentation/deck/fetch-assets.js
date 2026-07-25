@@ -5,13 +5,13 @@
 //
 // Everything is recoloured to a single tint at fetch time (the CDN takes the
 // colour in the path) so the logo strip reads as one designed row rather than
-// eight competing brand palettes on a dark background.
+// eight competing brand palettes on the white background.
 
 const fs = require("fs");
 const path = require("path");
 const sharp = require("sharp");
 
-const TINT = "F5F3F0"; // bone — the logo strip sits on the dark slide
+const TINT = "3A3D4D"; // slate — the logo strip sits on the white slide
 const OUT = path.join(__dirname, "assets");
 const SIZE = 320; // well above the 256px floor; these render small but crisp
 

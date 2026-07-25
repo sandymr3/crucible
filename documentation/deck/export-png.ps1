@@ -16,6 +16,11 @@ if (-not (Test-Path $deck)) { throw "deck not found: $deck" }
 if (Test-Path $out) { Remove-Item $out -Recurse -Force }
 New-Item -ItemType Directory -Path $out | Out-Null
 
+# COM attaches to an already-running PowerPoint rather than starting a fresh
+# one. If the user has PowerPoint open, Quit() here would try to close THEIR
+# session — so only Quit when this script started the instance.
+$preExisting = [bool](Get-Process POWERPNT -ErrorAction SilentlyContinue)
+
 $ppt = New-Object -ComObject PowerPoint.Application
 try {
     # msoTrue = -1. PowerPoint refuses to open a presentation fully hidden in
@@ -28,7 +33,7 @@ try {
         $pres.Close()
     }
 } finally {
-    $ppt.Quit()
+    if (-not $preExisting) { $ppt.Quit() }
     [System.Runtime.InteropServices.Marshal]::ReleaseComObject($ppt) | Out-Null
     [GC]::Collect()
     [GC]::WaitForPendingFinalizers()
@@ -36,10 +41,12 @@ try {
 
 # PowerPoint releases the file handle a moment after Quit() returns. Without
 # this wait the next `node build-deck.js` fails with EBUSY on a file nothing
-# appears to own.
-$deadline = (Get-Date).AddSeconds(20)
-while ((Get-Process POWERPNT -ErrorAction SilentlyContinue) -and (Get-Date) -lt $deadline) {
-    Start-Sleep -Milliseconds 250
+# appears to own. Skip when attached to the user's own instance.
+if (-not $preExisting) {
+    $deadline = (Get-Date).AddSeconds(20)
+    while ((Get-Process POWERPNT -ErrorAction SilentlyContinue) -and (Get-Date) -lt $deadline) {
+        Start-Sleep -Milliseconds 250
+    }
 }
 
 Get-ChildItem $out -Filter *.PNG | Sort-Object Name | ForEach-Object {

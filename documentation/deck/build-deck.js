@@ -1,10 +1,13 @@
-// Crucible — InnovaHack pitch deck, 8 slides.
+// Crucible — InnovaHack pitch deck, 8 slides, white ground.
 //
 //   node build-deck.js   ->   Crucible-InnovaHack.pptx
 //
 // Every figure on every slide comes from ./facts.js, which carries only measured
 // values from backend/docs/checkpoints/. Nothing here invents a number to fill a
 // layout.
+//
+// Colour discipline lives in ./theme.js — in particular, ember is a FILL and
+// never text on white. See the contrast rules there before changing anything.
 
 const path = require("path");
 const pptxgen = require("pptxgenjs");
@@ -43,7 +46,7 @@ const logo = (slug) => path.join(__dirname, "assets", `${slug}.png`);
 // ── helpers ────────────────────────────────────────────────────────────────
 
 /** Standard slide header. Content below it starts at y = 1.5. */
-function header(slide, { eyebrow, title, dark }) {
+function header(slide, { eyebrow, title }) {
   slide.addText(eyebrow, {
     x: G.M,
     y: 0.4,
@@ -65,7 +68,7 @@ function header(slide, { eyebrow, title, dark }) {
     fontFace: F.display,
     fontSize: 33,
     bold: true,
-    color: dark ? C.bone : "12141C",
+    color: C.ink,
     charSpacing: -0.6,
     margin: 0,
     valign: "middle",
@@ -90,8 +93,8 @@ function badge(slide, { x, y, d = 0.46, text, fill, color = "FFFFFF", size = 13 
   });
 }
 
-/** Big numeral over a small caption. */
-function stat(slide, { x, y, w, value, label, dark, accent = C.ember, size = 30 }) {
+/** Big numeral over a small caption. Molten, never ember — see theme rules. */
+function stat(slide, { x, y, w, value, label, size = 30 }) {
   slide.addText(value, {
     x,
     y,
@@ -100,7 +103,7 @@ function stat(slide, { x, y, w, value, label, dark, accent = C.ember, size = 30 
     fontFace: F.display,
     fontSize: size,
     bold: true,
-    color: accent,
+    color: C.molten,
     align: "center",
     valign: "middle",
     margin: 0,
@@ -113,7 +116,7 @@ function stat(slide, { x, y, w, value, label, dark, accent = C.ember, size = 30 
     h: 0.42,
     fontFace: F.mono,
     fontSize: 8.5,
-    color: dark ? C.slateMute : C.slateMute,
+    color: C.muted,
     align: "center",
     valign: "top",
     margin: 0,
@@ -122,16 +125,16 @@ function stat(slide, { x, y, w, value, label, dark, accent = C.ember, size = 30 
 }
 
 /** Rounded panel used for every card in the deck. */
-function panel(slide, { x, y, w, h, dark, fill, radius = 0.04, withShadow = true }) {
+function panel(slide, { x, y, w, h, fill, line, radius = 0.04, withShadow = true }) {
   slide.addShape("roundRect", {
     x,
     y,
     w,
     h,
     rectRadius: radius,
-    fill: { color: fill || (dark ? C.panel : C.boneCard) },
-    line: { color: dark ? C.line : C.lineLight, width: 1 },
-    ...(withShadow ? { shadow: shadow(dark ? { opacity: 0.4 } : { opacity: 0.1, blur: 8 }) } : {}),
+    fill: { color: fill || C.card },
+    line: { color: line || C.hair, width: 1 },
+    ...(withShadow ? { shadow: shadow() } : {}),
   });
 }
 
@@ -146,7 +149,7 @@ pres.title = "Crucible — InnovaHack";
 // ═══ 1 · Title ═════════════════════════════════════════════════════════════
 {
   const s = pres.addSlide();
-  s.background = { color: C.ink };
+  s.background = { color: C.page };
 
   s.addText("INNOVAHACK  ·  GEN AI PROBLEM STATEMENT 2", {
     x: G.M,
@@ -170,7 +173,7 @@ pres.title = "Crucible — InnovaHack";
     fontFace: F.display,
     fontSize: 68,
     bold: true,
-    color: C.bone,
+    color: C.ink,
     charSpacing: -1.5,
     margin: 0,
     valign: "middle",
@@ -183,18 +186,15 @@ pres.title = "Crucible — InnovaHack";
     h: 0.4,
     fontFace: F.body,
     fontSize: 17,
-    color: "B9BCC9",
+    color: C.body,
     margin: 0,
     valign: "middle",
   });
 
   s.addText(
     [
-      {
-        text: "Most interview prep is a quiz with a chat window bolted on.\n",
-        options: { color: "8C90A2" },
-      },
-      { text: "Crucible is a conversation that gets harder when you're good.", options: { color: C.ember } },
+      { text: "Most interview prep is a quiz with a chat window bolted on.\n", options: { color: C.muted } },
+      { text: "Crucible is a conversation that gets harder when you're good.", options: { color: C.molten } },
     ],
     {
       x: G.M,
@@ -226,7 +226,7 @@ pres.title = "Crucible — InnovaHack";
       w: bw,
       h,
       rectRadius: 0.02,
-      fill: { color: mix(C.molten, C.ember, i / (bars.length - 1)) },
+      fill: { color: mix(C.wave[0], C.wave[1], i / (bars.length - 1)) },
       line: { type: "none" },
     });
   });
@@ -237,15 +237,15 @@ pres.title = "Crucible — InnovaHack";
     h: 0.26,
     fontFace: F.mono,
     fontSize: 8.5,
-    color: "787D91",
+    color: C.faint,
     margin: 0,
     valign: "middle",
   });
 
   s.addText(
     [
-      { text: `${D.team.name}`, options: { color: C.bone, bold: true, fontSize: 15 } },
-      { text: `   ${D.team.members}`, options: { color: "7B7F92", fontSize: 12.5 } },
+      { text: `${D.team.name}`, options: { color: C.ink, bold: true, fontSize: 15 } },
+      { text: `   ${D.team.members}`, options: { color: C.muted, fontSize: 12.5 } },
     ],
     { x: G.M, y: 6.62, w: 7.6, h: 0.4, fontFace: F.display, margin: 0, valign: "middle" }
   );
@@ -257,10 +257,10 @@ pres.title = "Crucible — InnovaHack";
     w: 4.07,
     h: 0.38,
     rectRadius: 0.19,
-    fill: { color: "16241C" },
-    line: { color: "2A4A38", width: 1 },
+    fill: { color: C.okFill },
+    line: { color: C.okLine, width: 1 },
   });
-  s.addShape("ellipse", { x: 8.86, y: 6.755, w: 0.13, h: 0.13, fill: { color: C.validated } });
+  s.addShape("ellipse", { x: 8.86, y: 6.755, w: 0.13, h: 0.13, fill: { color: C.ok } });
   s.addText(D.url, {
     x: 9.06,
     y: 6.63,
@@ -268,7 +268,7 @@ pres.title = "Crucible — InnovaHack";
     h: 0.38,
     fontFace: F.mono,
     fontSize: 8.5,
-    color: "8FC7AA",
+    color: C.ok,
     margin: 0,
     valign: "middle",
   });
@@ -286,7 +286,7 @@ pres.title = "Crucible — InnovaHack";
 // ═══ 2 · Problem + insight ═════════════════════════════════════════════════
 {
   const s = pres.addSlide();
-  s.background = { color: C.bone };
+  s.background = { color: C.page };
   header(s, { eyebrow: "THE PROBLEM", title: "Interview prep tools don't listen." });
 
   const rows = [
@@ -309,7 +309,7 @@ pres.title = "Crucible — InnovaHack";
 
   rows.forEach((r, i) => {
     const y = 1.62 + i * 1.42;
-    badge(s, { x: G.M, y: y + 0.02, d: 0.44, text: r.n, fill: "12141C", size: 12 });
+    badge(s, { x: G.M, y: y + 0.02, d: 0.44, text: r.n, fill: C.ink, size: 12 });
     s.addText(r.h, {
       x: G.M + 0.66,
       y,
@@ -318,7 +318,7 @@ pres.title = "Crucible — InnovaHack";
       fontFace: F.display,
       fontSize: 15.5,
       bold: true,
-      color: "12141C",
+      color: C.ink,
       margin: 0,
       valign: "middle",
     });
@@ -329,17 +329,18 @@ pres.title = "Crucible — InnovaHack";
       h: 0.78,
       fontFace: F.body,
       fontSize: 12.5,
-      color: C.slate,
+      color: C.body,
       lineSpacingMultiple: 1.16,
       margin: 0,
       valign: "top",
     });
   });
 
-  // Insight panel — dark card on the light slide, so it pops as the turn.
+  // Insight panel — a warm molten tint so it still reads as the turn of the
+  // argument without reintroducing a dark ground.
   const px = 7.24,
     pw = G.W - G.M - px;
-  panel(s, { x: px, y: 1.55, w: pw, h: 3.92, dark: true });
+  panel(s, { x: px, y: 1.55, w: pw, h: 3.92, fill: "FFF5F0", line: "F3D6C7" });
   s.addText("THE INSIGHT", {
     x: px + 0.42,
     y: 1.86,
@@ -355,14 +356,14 @@ pres.title = "Crucible — InnovaHack";
   });
   s.addText(
     [
-      { text: "The gap isn't question generation.\n", options: { color: "8C90A2" } },
-      { text: "It's that nothing ", options: { color: C.bone } },
-      { text: "hears you", options: { color: C.ember } },
-      { text: ", adapts ", options: { color: C.bone } },
-      { text: "mid-conversation", options: { color: C.ember } },
-      { text: ", and shows you ", options: { color: C.bone } },
-      { text: "where", options: { color: C.ember } },
-      { text: " you were vague.", options: { color: C.bone } },
+      { text: "The gap isn't question generation.\n", options: { color: C.muted } },
+      { text: "It's that nothing ", options: { color: C.ink } },
+      { text: "hears you", options: { color: C.molten } },
+      { text: ", adapts ", options: { color: C.ink } },
+      { text: "mid-conversation", options: { color: C.molten } },
+      { text: ", and shows you ", options: { color: C.ink } },
+      { text: "where", options: { color: C.molten } },
+      { text: " you were vague.", options: { color: C.ink } },
     ],
     {
       x: px + 0.42,
@@ -387,7 +388,7 @@ pres.title = "Crucible — InnovaHack";
       h: 1.14,
       fontFace: F.body,
       fontSize: 12.5,
-      color: "9DA1B2",
+      color: C.body,
       lineSpacingMultiple: 1.18,
       margin: 0,
       valign: "top",
@@ -396,8 +397,8 @@ pres.title = "Crucible — InnovaHack";
 
   s.addText(
     [
-      { text: "So we built the thing that does: ", options: { color: C.slate } },
-      { text: "adaptive difficulty you can hear.", options: { color: "12141C", bold: true } },
+      { text: "So we built the thing that does: ", options: { color: C.body } },
+      { text: "adaptive difficulty you can hear.", options: { color: C.ink, bold: true } },
     ],
     {
       x: G.M,
@@ -425,7 +426,7 @@ pres.title = "Crucible — InnovaHack";
 // ═══ 3 · How it works ══════════════════════════════════════════════════════
 {
   const s = pres.addSlide();
-  s.background = { color: C.bone };
+  s.background = { color: C.page };
   header(s, { eyebrow: "THE SOLUTION", title: "Upload. Talk. Watch your words get graded." });
 
   const steps = [
@@ -447,7 +448,7 @@ pres.title = "Crucible — InnovaHack";
       fontFace: F.display,
       fontSize: 16,
       bold: true,
-      color: "12141C",
+      color: C.ink,
       margin: 0,
       valign: "middle",
     });
@@ -458,7 +459,7 @@ pres.title = "Crucible — InnovaHack";
       h: 0.92,
       fontFace: F.body,
       fontSize: 11.5,
-      color: C.slate,
+      color: C.body,
       lineSpacingMultiple: 1.14,
       margin: 0,
       valign: "top",
@@ -469,17 +470,18 @@ pres.title = "Crucible — InnovaHack";
         y: 1.85,
         w: 0.18,
         h: 0,
-        line: { color: "C9C4BD", width: 1.25, endArrowType: "triangle" },
+        line: { color: C.hairStrong, width: 1.25, endArrowType: "triangle" },
       });
     }
   });
 
-  // The four-verdict chip legend — the product's signature visual.
+  // The four-verdict legend, rendered the way the product renders a span:
+  // a light highlight tint with darker text on it.
   const verdicts = [
-    { c: C.validated, t: "validated", d: "backed and correct" },
-    { c: C.incomplete, t: "incomplete", d: "true but thin" },
-    { c: C.unsupported, t: "unsupported", d: "claimed, not evidenced" },
-    { c: C.incorrect, t: "incorrect", d: "confidently wrong" },
+    { v: C.verdict.validated, t: "validated", d: "backed and correct" },
+    { v: C.verdict.incomplete, t: "incomplete", d: "true but thin" },
+    { v: C.verdict.unsupported, t: "unsupported", d: "claimed, not evidenced" },
+    { v: C.verdict.incorrect, t: "incorrect", d: "confidently wrong" },
   ];
   s.addText("FOUR VERDICTS, ANCHORED TO YOUR ACTUAL WORDS", {
     x: G.M,
@@ -489,7 +491,7 @@ pres.title = "Crucible — InnovaHack";
     fontFace: F.mono,
     fontSize: 9.5,
     bold: true,
-    color: C.slateMute,
+    color: C.muted,
     charSpacing: 1.4,
     margin: 0,
     valign: "middle",
@@ -503,7 +505,7 @@ pres.title = "Crucible — InnovaHack";
       w: vw - 0.22,
       h: 0.62,
       rectRadius: 0.08,
-      fill: { color: v.c },
+      fill: { color: v.v.fill },
       line: { type: "none" },
     });
     s.addText(v.t, {
@@ -514,7 +516,7 @@ pres.title = "Crucible — InnovaHack";
       fontFace: F.mono,
       fontSize: 12,
       bold: true,
-      color: "FFFFFF",
+      color: v.v.ink,
       margin: 0,
       valign: "middle",
     });
@@ -525,14 +527,14 @@ pres.title = "Crucible — InnovaHack";
       h: 0.24,
       fontFace: F.body,
       fontSize: 10.5,
-      color: "FFFFFF",
+      color: v.v.ink,
       margin: 0,
       valign: "middle",
     });
   });
 
   // Persona proof — measured, from phase 3.
-  panel(s, { x: G.M, y: 5.02, w: G.CW, h: 1.62, dark: false });
+  panel(s, { x: G.M, y: 5.02, w: G.CW, h: 1.62 });
   s.addText("Same résumé, same JD, three personas — the opening questions genuinely diverge:", {
     x: G.M + 0.34,
     y: 5.18,
@@ -541,7 +543,7 @@ pres.title = "Crucible — InnovaHack";
     fontFace: F.body,
     fontSize: 12,
     italic: true,
-    color: C.slate,
+    color: C.body,
     margin: 0,
     valign: "middle",
   });
@@ -556,7 +558,7 @@ pres.title = "Crucible — InnovaHack";
     s.addText(
       [
         { text: p.p, options: { color: C.molten, bold: true, fontSize: 9.5, charSpacing: 1.2 } },
-        { text: `   ${p.v}`, options: { color: C.slateMute, fontSize: 9 } },
+        { text: `   ${p.v}`, options: { color: C.muted, fontSize: 9 } },
       ],
       { x, y: 5.52, w: pw2 - 0.24, h: 0.24, fontFace: F.mono, margin: 0, valign: "middle" }
     );
@@ -567,7 +569,7 @@ pres.title = "Crucible — InnovaHack";
       h: 0.74,
       fontFace: F.body,
       fontSize: 10.5,
-      color: C.slate,
+      color: C.body,
       lineSpacingMultiple: 1.1,
       margin: 0,
       valign: "top",
@@ -587,8 +589,8 @@ pres.title = "Crucible — InnovaHack";
 // ═══ 4 · The product (screenshot slots) ════════════════════════════════════
 {
   const s = pres.addSlide();
-  s.background = { color: C.ink };
-  header(s, { eyebrow: "THE PRODUCT", title: "What the candidate actually sees.", dark: true });
+  s.background = { color: C.page };
+  header(s, { eyebrow: "THE PRODUCT", title: "What the candidate actually sees." });
 
   const frame = (slot, { x, y, w, h, labelSize = 9.5 }) => {
     if (slot.file) {
@@ -600,7 +602,7 @@ pres.title = "Crucible — InnovaHack";
         h,
         rectRadius: 0.03,
         fill: { type: "none" },
-        line: { color: C.line, width: 1 },
+        line: { color: C.hairStrong, width: 1 },
       });
     } else {
       s.addShape("roundRect", {
@@ -609,8 +611,8 @@ pres.title = "Crucible — InnovaHack";
         w,
         h,
         rectRadius: 0.03,
-        fill: { color: C.panel },
-        line: { color: C.line, width: 1 },
+        fill: { color: C.card },
+        line: { color: C.hairStrong, width: 1 },
       });
       // The caption below the frame already names the screen, so the interior
       // stays neutral rather than repeating the label back at the reader.
@@ -621,7 +623,7 @@ pres.title = "Crucible — InnovaHack";
         h: 0.32,
         fontFace: F.mono,
         fontSize: labelSize,
-        color: "4A4E62",
+        color: C.faint,
         align: "center",
         charSpacing: 2,
         margin: 0,
@@ -652,7 +654,7 @@ pres.title = "Crucible — InnovaHack";
     h: 0.82,
     fontFace: F.body,
     fontSize: 12,
-    color: "9DA1B2",
+    color: C.body,
     lineSpacingMultiple: 1.16,
     margin: 0,
     valign: "top",
@@ -684,7 +686,7 @@ pres.title = "Crucible — InnovaHack";
       h: 0.6,
       fontFace: F.body,
       fontSize: 11,
-      color: "9DA1B2",
+      color: C.body,
       lineSpacingMultiple: 1.14,
       margin: 0,
       valign: "top",
@@ -702,8 +704,8 @@ pres.title = "Crucible — InnovaHack";
 // ═══ 5 · Architecture and stack ════════════════════════════════════════════
 {
   const s = pres.addSlide();
-  s.background = { color: C.ink };
-  header(s, { eyebrow: "ARCHITECTURE", title: "One Go binary between a browser and Vertex AI.", dark: true });
+  s.background = { color: C.page };
+  header(s, { eyebrow: "ARCHITECTURE", title: "One Go binary between a browser and Vertex AI." });
 
   const colLabel = (t, x, w) =>
     s.addText(t, {
@@ -714,7 +716,7 @@ pres.title = "Crucible — InnovaHack";
       fontFace: F.mono,
       fontSize: 9,
       bold: true,
-      color: C.slateMute,
+      color: C.muted,
       charSpacing: 1.6,
       align: "center",
       margin: 0,
@@ -722,12 +724,12 @@ pres.title = "Crucible — InnovaHack";
     });
 
   // ── Column A · client
-  // Gutters are sized to hold the arrow labels. The first cut had a 0.8in gap
+  // Gutters are sized to hold the arrow labels. An earlier cut had a 0.8in gap
   // and the "wss:// PCM16 16k" caption ran underneath the Cloud Run panel.
   const ax = G.M,
     aw = 1.95;
   colLabel("CLIENT", ax, aw);
-  panel(s, { x: ax, y: 2.42, w: aw, h: 1.62, dark: true });
+  panel(s, { x: ax, y: 2.42, w: aw, h: 1.62 });
   s.addText("Browser", {
     x: ax,
     y: 2.6,
@@ -736,7 +738,7 @@ pres.title = "Crucible — InnovaHack";
     fontFace: F.display,
     fontSize: 15,
     bold: true,
-    color: C.bone,
+    color: C.ink,
     align: "center",
     margin: 0,
     valign: "middle",
@@ -748,7 +750,7 @@ pres.title = "Crucible — InnovaHack";
     h: 0.92,
     fontFace: F.mono,
     fontSize: 9.5,
-    color: "8C90A2",
+    color: C.muted,
     align: "center",
     lineSpacingMultiple: 1.24,
     margin: 0,
@@ -759,11 +761,11 @@ pres.title = "Crucible — InnovaHack";
   const bx = 4.05,
     bw2 = 4.85;
   colLabel("GOOGLE CLOUD RUN", bx, bw2);
-  panel(s, { x: bx, y: 1.75, w: bw2, h: 3.3, dark: true, fill: "141621" });
+  panel(s, { x: bx, y: 1.75, w: bw2, h: 3.3, fill: C.raised });
   s.addText(
     [
-      { text: "one Go binary", options: { color: C.bone, bold: true, fontSize: 14 } },
-      { text: "   ·   min-instances=1, session affinity", options: { color: "70748A", fontSize: 9.5 } },
+      { text: "one Go binary", options: { color: C.ink, bold: true, fontSize: 14 } },
+      { text: "   ·   min-instances=1, session affinity", options: { color: C.muted, fontSize: 9.5 } },
     ],
     { x: bx + 0.24, y: 1.86, w: bw2 - 0.48, h: 0.3, fontFace: F.display, margin: 0, valign: "middle" }
   );
@@ -781,8 +783,8 @@ pres.title = "Crucible — InnovaHack";
       w: bw2 - 0.48,
       h: 0.48,
       rectRadius: 0.05,
-      fill: { color: C.panelUp },
-      line: { type: "none" },
+      fill: { color: C.page },
+      line: { color: C.hair, width: 1 },
     });
     s.addText(l.k, {
       x: bx + 0.4,
@@ -803,7 +805,7 @@ pres.title = "Crucible — InnovaHack";
       h: 0.48,
       fontFace: F.body,
       fontSize: 10.5,
-      color: "A8ACBC",
+      color: C.body,
       margin: 0,
       valign: "middle",
     });
@@ -815,8 +817,8 @@ pres.title = "Crucible — InnovaHack";
     w: bw2 - 0.48,
     h: 0.68,
     rectRadius: 0.05,
-    fill: { color: "101320" },
-    line: { color: C.line, width: 1 },
+    fill: { color: C.sunken },
+    line: { color: C.hair, width: 1 },
   });
   s.addText("Firestore — source of truth   ·   Cloud Storage", {
     x: bx + 0.24,
@@ -825,7 +827,7 @@ pres.title = "Crucible — InnovaHack";
     h: 0.36,
     fontFace: F.mono,
     fontSize: 9.5,
-    color: "8C90A2",
+    color: C.body,
     align: "center",
     margin: 0,
     valign: "middle",
@@ -838,7 +840,7 @@ pres.title = "Crucible — InnovaHack";
     fontFace: F.body,
     fontSize: 9.5,
     italic: true,
-    color: "5C6072",
+    color: C.muted,
     align: "center",
     margin: 0,
     valign: "middle",
@@ -848,7 +850,7 @@ pres.title = "Crucible — InnovaHack";
   const cx = 9.9,
     cw = G.W - G.M - cx;
   colLabel("VERTEX AI", cx, cw);
-  panel(s, { x: cx, y: 1.75, w: cw, h: 3.3, dark: true, fill: "141621" });
+  panel(s, { x: cx, y: 1.75, w: cw, h: 3.3, fill: C.raised });
   const models = [
     { m: "gemini-live-2.5-\nflash-native-audio", r: "the conversation", t: "us-central1" },
     { m: "gemini-3.6-flash", r: "span grading, digest", t: "4.3 s · global" },
@@ -862,8 +864,8 @@ pres.title = "Crucible — InnovaHack";
       w: cw - 0.4,
       h: 0.86,
       rectRadius: 0.05,
-      fill: { color: C.panelUp },
-      line: { type: "none" },
+      fill: { color: C.page },
+      line: { color: C.hair, width: 1 },
     });
     s.addText(mo.m, {
       x: cx + 0.34,
@@ -873,7 +875,7 @@ pres.title = "Crucible — InnovaHack";
       fontFace: F.mono,
       fontSize: 8.5,
       bold: true,
-      color: C.ember,
+      color: C.emberInk,
       lineSpacingMultiple: 1.05,
       margin: 0,
       valign: "middle",
@@ -885,7 +887,7 @@ pres.title = "Crucible — InnovaHack";
       h: 0.2,
       fontFace: F.body,
       fontSize: 10,
-      color: C.bone,
+      color: C.ink,
       margin: 0,
       valign: "middle",
     });
@@ -896,7 +898,7 @@ pres.title = "Crucible — InnovaHack";
       h: 0.2,
       fontFace: F.mono,
       fontSize: 8.5,
-      color: "70748A",
+      color: C.muted,
       margin: 0,
       valign: "middle",
     });
@@ -932,7 +934,7 @@ pres.title = "Crucible — InnovaHack";
         h: 0.24,
         fontFace: F.mono,
         fontSize: 8,
-        color: "70748A",
+        color: C.muted,
         align: "center",
         margin: 0,
         valign: "middle",
@@ -945,15 +947,15 @@ pres.title = "Crucible — InnovaHack";
   // This arrow is the adaptive-difficulty mechanism, so it gets its own label.
   const loopX = cx + cw / 2,
     loopBack = bx + 0.55;
-  s.addShape("line", { x: loopX, y: 5.05, w: 0, h: 0.32, line: { color: C.ember, width: 1.5 } });
+  s.addShape("line", { x: loopX, y: 5.05, w: 0, h: 0.32, line: { color: C.emberInk, width: 1.5 } });
   s.addShape("line", {
     x: loopBack,
     y: 5.37,
     w: loopX - loopBack,
     h: 0,
-    line: { color: C.ember, width: 1.5, beginArrowType: "triangle" },
+    line: { color: C.emberInk, width: 1.5, beginArrowType: "triangle" },
   });
-  s.addShape("line", { x: loopBack, y: 5.19, w: 0, h: 0.18, line: { color: C.ember, width: 1.5 } });
+  s.addShape("line", { x: loopBack, y: 5.19, w: 0, h: 0.18, line: { color: C.emberInk, width: 1.5 } });
   s.addText("INJECTION LOOP  —  the grade steers the next question, inside the same open session", {
     x: loopBack,
     y: 5.4,
@@ -962,7 +964,7 @@ pres.title = "Crucible — InnovaHack";
     fontFace: F.mono,
     fontSize: 8,
     bold: true,
-    color: C.ember,
+    color: C.emberInk,
     align: "center",
     margin: 0,
     valign: "middle",
@@ -990,7 +992,7 @@ pres.title = "Crucible — InnovaHack";
       fontFace: F.display,
       fontSize: 11.5,
       bold: true,
-      color: C.bone,
+      color: C.ink,
       margin: 0,
       valign: "middle",
     });
@@ -1001,7 +1003,7 @@ pres.title = "Crucible — InnovaHack";
       h: 0.6,
       fontFace: F.body,
       fontSize: 10,
-      color: "80849A",
+      color: C.body,
       lineSpacingMultiple: 1.1,
       margin: 0,
       valign: "top",
@@ -1030,7 +1032,7 @@ pres.title = "Crucible — InnovaHack";
       h: 0.22,
       fontFace: F.mono,
       fontSize: 7.5,
-      color: "6E7285",
+      color: C.muted,
       align: "center",
       margin: 0,
       valign: "middle",
@@ -1042,7 +1044,7 @@ pres.title = "Crucible — InnovaHack";
       "Two things a technical judge should take away.\n\n" +
       "First, the relay is structurally mandatory. Vertex wants an OAuth2 bearer token from a service " +
       "account — you cannot put that in frontend code, so every audio frame goes through us.\n\n" +
-      "Second, the ember arrow. The grade for turn N is injected back into the SAME open live session " +
+      "Second, the amber arrow. The grade for turn N is injected back into the SAME open live session " +
       "before turn N+1 is asked. That is the adaptive difficulty, and it's why it's audible rather " +
       "than a number on a dashboard."
   );
@@ -1051,7 +1053,7 @@ pres.title = "Crucible — InnovaHack";
 // ═══ 6 · Four hard problems ════════════════════════════════════════════════
 {
   const s = pres.addSlide();
-  s.background = { color: C.bone };
+  s.background = { color: C.page };
   header(s, { eyebrow: "ENGINEERING DEPTH", title: "Four problems that make this hard." });
 
   const cards = [
@@ -1090,8 +1092,8 @@ pres.title = "Crucible — InnovaHack";
   cards.forEach((c, i) => {
     const x = G.M + (i % 2) * (cw2 + 0.3);
     const y = 1.55 + Math.floor(i / 2) * (ch + 0.26);
-    panel(s, { x, y, w: cw2, h: ch, dark: false });
-    badge(s, { x: x + 0.34, y: y + 0.3, d: 0.42, text: c.n, fill: "12141C", size: 11.5 });
+    panel(s, { x, y, w: cw2, h: ch });
+    badge(s, { x: x + 0.34, y: y + 0.3, d: 0.42, text: c.n, fill: C.ink, size: 11.5 });
     s.addText(c.t, {
       x: x + 0.88,
       y: y + 0.28,
@@ -1100,7 +1102,7 @@ pres.title = "Crucible — InnovaHack";
       fontFace: F.display,
       fontSize: 15,
       bold: true,
-      color: "12141C",
+      color: C.ink,
       lineSpacingMultiple: 1.0,
       margin: 0,
       valign: "middle",
@@ -1112,7 +1114,7 @@ pres.title = "Crucible — InnovaHack";
       h: 1.0,
       fontFace: F.body,
       fontSize: 11,
-      color: C.slate,
+      color: C.body,
       lineSpacingMultiple: 1.14,
       margin: 0,
       valign: "top",
@@ -1120,7 +1122,7 @@ pres.title = "Crucible — InnovaHack";
     s.addText(
       [
         { text: c.pv, options: { color: C.molten, bold: true, fontSize: 19, fontFace: F.display } },
-        { text: `    ${c.pl}`, options: { color: C.slateMute, fontSize: 9.5, fontFace: F.mono } },
+        { text: `    ${c.pl}`, options: { color: C.muted, fontSize: 9.5, fontFace: F.mono } },
       ],
       { x: x + 0.34, y: y + 1.84, w: cw2 - 0.68, h: 0.34, margin: 0, valign: "middle" }
     );
@@ -1136,7 +1138,7 @@ pres.title = "Crucible — InnovaHack";
       fontFace: F.body,
       fontSize: 12,
       italic: true,
-      color: C.slateMute,
+      color: C.muted,
       margin: 0,
       valign: "middle",
     }
@@ -1157,14 +1159,14 @@ pres.title = "Crucible — InnovaHack";
 // ═══ 7 · SWOT ══════════════════════════════════════════════════════════════
 {
   const s = pres.addSlide();
-  s.background = { color: C.bone };
+  s.background = { color: C.page };
   header(s, { eyebrow: "SWOT", title: "Where we're strong, and where we're not." });
 
   const quads = [
     {
       k: "S",
       t: "Strengths",
-      c: C.validated,
+      c: C.verdict.validated.ink,
       items: [
         "Deployed and answering, not a mock — 8/8 on the problem statement",
         "Genuinely voice-native: bidirectional speech, not STT→LLM→TTS",
@@ -1175,7 +1177,7 @@ pres.title = "Crucible — InnovaHack";
     {
       k: "W",
       t: "Weaknesses",
-      c: C.incorrect,
+      c: C.verdict.incorrect.ink,
       items: [
         "WebSocket reconnect is unbuilt — a dropped socket ends the session",
         "Evaluation runs 5–8 s against a 4 s target; the heatmap reveals a beat late",
@@ -1186,7 +1188,7 @@ pres.title = "Crucible — InnovaHack";
     {
       k: "O",
       t: "Opportunities",
-      c: C.unsupported,
+      c: C.verdict.unsupported.ink,
       items: [
         "The Live model ships 24 languages and 30 HD voices — regional-language prep is wide open",
         "Campus placement cells and bootcamps are a natural per-seat B2B wedge",
@@ -1197,7 +1199,7 @@ pres.title = "Crucible — InnovaHack";
     {
       k: "T",
       t: "Threats",
-      c: C.incomplete,
+      c: C.verdict.incomplete.ink,
       items: [
         "Live audio dominates cost, so unit economics track model pricing",
         "Incumbents could add voice to an existing question bank",
@@ -1212,7 +1214,7 @@ pres.title = "Crucible — InnovaHack";
   quads.forEach((q, i) => {
     const x = G.M + (i % 2) * (qw + 0.3);
     const y = 1.55 + Math.floor(i / 2) * (qh + 0.26);
-    panel(s, { x, y, w: qw, h: qh, dark: false });
+    panel(s, { x, y, w: qw, h: qh });
     badge(s, { x: x + 0.34, y: y + 0.28, d: 0.44, text: q.k, fill: q.c, size: 15 });
     s.addText(q.t, {
       x: x + 0.9,
@@ -1222,7 +1224,7 @@ pres.title = "Crucible — InnovaHack";
       fontFace: F.display,
       fontSize: 17,
       bold: true,
-      color: "12141C",
+      color: C.ink,
       margin: 0,
       valign: "middle",
     });
@@ -1238,7 +1240,7 @@ pres.title = "Crucible — InnovaHack";
         h: 1.36,
         fontFace: F.body,
         fontSize: 10.5,
-        color: C.slate,
+        color: C.body,
         lineSpacingMultiple: 1.1,
         paraSpaceAfter: 4,
         margin: 0,
@@ -1257,7 +1259,7 @@ pres.title = "Crucible — InnovaHack";
       fontFace: F.body,
       fontSize: 12,
       italic: true,
-      color: C.slateMute,
+      color: C.muted,
       margin: 0,
       valign: "middle",
     }
@@ -1276,8 +1278,8 @@ pres.title = "Crucible — InnovaHack";
 // ═══ 8 · Measured, not asserted ════════════════════════════════════════════
 {
   const s = pres.addSlide();
-  s.background = { color: C.ink };
-  header(s, { eyebrow: "VALIDATION", title: "Measured, not asserted.", dark: true });
+  s.background = { color: C.page };
+  header(s, { eyebrow: "VALIDATION", title: "Measured, not asserted." });
 
   // Band 1 — six stat callouts
   const stats = [
@@ -1290,7 +1292,7 @@ pres.title = "Crucible — InnovaHack";
   ];
   const stw = G.CW / 6;
   stats.forEach((st, i) => {
-    stat(s, { x: G.M + i * stw, y: 1.5, w: stw, value: st.v, label: st.l, dark: true, size: 29 });
+    stat(s, { x: G.M + i * stw, y: 1.5, w: stw, value: st.v, label: st.l, size: 29 });
   });
 
   // Band 2 left — the model A/B chart
@@ -1308,35 +1310,35 @@ pres.title = "Crucible — InnovaHack";
       w: chw,
       h: 2.62,
       barDir: "col",
-      chartColors: ["5A5E70", C.molten],
+      chartColors: ["B9BCC7", C.molten],
       showTitle: true,
       title: "Evaluation latency by model — seconds, three warm runs",
-      titleColor: C.bone,
+      titleColor: C.ink,
       titleFontFace: F.body,
       titleFontSize: 11,
       showValue: true,
       dataLabelPosition: "outEnd",
-      dataLabelColor: "C6C9D6",
+      dataLabelColor: C.body,
       dataLabelFontFace: F.mono,
       dataLabelFontSize: 9,
       dataLabelFormatCode: '0.0"s"',
       showLegend: true,
       legendPos: "b",
-      legendColor: "9DA1B2",
+      legendColor: C.body,
       legendFontFace: F.mono,
       legendFontSize: 9,
-      catAxisLabelColor: "8C90A2",
+      catAxisLabelColor: C.muted,
       catAxisLabelFontFace: F.mono,
       catAxisLabelFontSize: 9,
-      valAxisLabelColor: "8C90A2",
+      valAxisLabelColor: C.muted,
       valAxisLabelFontFace: F.mono,
       valAxisLabelFontSize: 9,
-      valGridLine: { color: "23263A", size: 1 },
+      valGridLine: { color: C.hair, size: 1 },
       catGridLine: { style: "none" },
       valAxisMaxVal: 60,
-      border: { pt: 0, color: C.ink },
-      fill: C.ink,
-      plotArea: { fill: { color: C.ink } },
+      border: { pt: 0, color: C.page },
+      fill: C.page,
+      plotArea: { fill: { color: C.page } },
     }
   );
   s.addText(
@@ -1349,7 +1351,7 @@ pres.title = "Crucible — InnovaHack";
       fontFace: F.body,
       fontSize: 10,
       italic: true,
-      color: "80849A",
+      color: C.muted,
       lineSpacingMultiple: 1.12,
       margin: 0,
       valign: "top",
@@ -1390,7 +1392,7 @@ pres.title = "Crucible — InnovaHack";
       h: 0.3,
       fontFace: F.body,
       fontSize: 10.5,
-      color: "A8ACBC",
+      color: C.body,
       margin: 0,
       valign: "middle",
     });
@@ -1402,7 +1404,7 @@ pres.title = "Crucible — InnovaHack";
       fontFace: F.mono,
       fontSize: 10.5,
       bold: true,
-      color: C.ember,
+      color: C.emberInk,
       align: "right",
       margin: 0,
       valign: "middle",
@@ -1413,8 +1415,8 @@ pres.title = "Crucible — InnovaHack";
   s.addText(
     [
       { text: "PER-SESSION LEDGER   ", options: { color: C.molten, bold: true, fontSize: 8.5, charSpacing: 1.2 } },
-      { text: D.cost, options: { color: "A8ACBC", fontSize: 9.5 } },
-      { text: "   —  metered per session, so unit economics are a number we can quote, not a guess.", options: { color: "6E7285", fontSize: 9.5 } },
+      { text: D.cost, options: { color: C.body, fontSize: 9.5 } },
+      { text: "   —  metered per session, so unit economics are a number we can quote, not a guess.", options: { color: C.muted, fontSize: 9.5 } },
     ],
     { x: G.M, y: 5.86, w: G.CW, h: 0.28, fontFace: F.mono, margin: 0, valign: "middle" }
   );
@@ -1429,8 +1431,8 @@ pres.title = "Crucible — InnovaHack";
       w: nw2 - 0.16,
       h: 0.42,
       rectRadius: 0.21,
-      fill: { color: C.panel },
-      line: { color: C.line, width: 1 },
+      fill: { color: C.card },
+      line: { color: C.hairStrong, width: 1 },
     });
     s.addText(t, {
       x: x + 0.1,
@@ -1439,7 +1441,7 @@ pres.title = "Crucible — InnovaHack";
       h: 0.42,
       fontFace: F.body,
       fontSize: 9.5,
-      color: "A8ACBC",
+      color: C.body,
       align: "center",
       margin: 0,
       valign: "middle",
@@ -1449,8 +1451,8 @@ pres.title = "Crucible — InnovaHack";
   // Footer
   s.addText(
     [
-      { text: `${D.team.name}`, options: { color: C.bone, bold: true } },
-      { text: `   ${D.team.members}`, options: { color: "6E7285" } },
+      { text: `${D.team.name}`, options: { color: C.ink, bold: true } },
+      { text: `   ${D.team.members}`, options: { color: C.muted } },
     ],
     { x: G.M, y: 6.86, w: 7.0, h: 0.34, fontFace: F.display, fontSize: 11, margin: 0, valign: "middle" }
   );
@@ -1461,7 +1463,7 @@ pres.title = "Crucible — InnovaHack";
     h: 0.34,
     fontFace: F.mono,
     fontSize: 9.5,
-    color: "8FC7AA",
+    color: C.ok,
     align: "right",
     margin: 0,
     valign: "middle",

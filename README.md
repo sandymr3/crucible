@@ -3,6 +3,13 @@
 **An adaptive, voice-native AI interview and study coach, built entirely on Vertex AI.**
 
 InnovaHack — Gen AI Problem Statement 2: Personalized AI Study / Interview Coach.
+Team **PULL REQUEST** — Santhosh P · Hrithik Sankar R.
+
+| | |
+|---|---|
+| **Live backend** | https://crucible-backend-103350253775.us-central1.run.app ([`/health`](https://crucible-backend-103350253775.us-central1.run.app/health)) |
+| **Documentation** | [`documentation/`](documentation/README.md) — starts with a criterion-by-criterion evidence map |
+| **Pitch deck** | [`documentation/deck/Crucible-InnovaHack.pptx`](documentation/deck/Crucible-InnovaHack.pptx) |
 
 Most interview prep is a quiz generator with a chat window bolted on. Crucible is
 a **live conversation**. You upload your resume and the job description you're
@@ -68,6 +75,16 @@ audio frame passes through the backend.
 - **Replay Mode.** A recorded session is served over the *identical* WebSocket
   protocol with zero Vertex calls — indistinguishable from live, and immune to
   venue wifi.
+
+## Documentation
+
+[`documentation/`](documentation/README.md) is written for a reviewer: an index
+that maps each evaluation criterion to the file and section that satisfies it,
+then nine numbered documents — problem and solution, innovation, architecture,
+the full API reference (24 routes + the WebSocket protocol), security and
+guardrails, testing and measured results, scalability and unit economics, a
+runnable setup guide, and the demo script. Every figure in it is a measured
+value from [`backend/docs/checkpoints/`](backend/docs/checkpoints/).
 
 ## Layout
 
