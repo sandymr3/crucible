@@ -2,9 +2,11 @@ import { initializeApp, type FirebaseApp } from 'firebase/app'
 import {
   GoogleAuthProvider,
   getAuth,
+  getRedirectResult,
   onAuthStateChanged,
   signInAnonymously,
   signInWithPopup,
+  signInWithRedirect,
   signOut,
   type Auth,
   type User,
@@ -80,9 +82,61 @@ export function onAuthChange(callback: (user: User | null) => void): () => void 
   return onAuthStateChanged(ensureAuth(), callback)
 }
 
-export function signInWithGoogle(): Promise<User> {
+/**
+ * Popup errors that mean the POPUP MECHANISM failed, not the sign-in itself.
+ * For these the redirect flow is the correct retry, immediately.
+ */
+const POPUP_MECHANISM_FAILURES = [
+  'auth/popup-blocked',
+  'auth/web-storage-unsupported',
+  'auth/operation-not-supported-in-this-environment',
+]
+
+/**
+ * Set after a popup closes without completing. A user genuinely cancelling and
+ * a popup being killed by the environment produce the same error code, so the
+ * first close is treated as a cancel — and the NEXT attempt goes straight to
+ * the full-page redirect flow, which nothing can close early.
+ */
+let popupClosedOnce = false
+
+/**
+ * Google sign-in. Popup first; falls back to redirect when the popup path is
+ * unavailable. Resolves null when a redirect navigation has started — the
+ * result arrives via completeRedirectSignIn() after the round trip.
+ */
+export async function signInWithGoogle(): Promise<User | null> {
   const provider = new GoogleAuthProvider()
-  return signInWithPopup(ensureAuth(), provider).then((result) => result.user)
+  const authInstance = ensureAuth()
+
+  if (popupClosedOnce) {
+    await signInWithRedirect(authInstance, provider)
+    return null
+  }
+
+  try {
+    const result = await signInWithPopup(authInstance, provider)
+    return result.user
+  } catch (error) {
+    const code = (error as { code?: string }).code ?? ''
+    if (POPUP_MECHANISM_FAILURES.some((c) => code.includes(c))) {
+      await signInWithRedirect(authInstance, provider)
+      return null
+    }
+    if (code.includes('popup-closed-by-user') || code.includes('cancelled-popup-request')) {
+      popupClosedOnce = true
+    }
+    throw error
+  }
+}
+
+/**
+ * Completes a redirect-flow sign-in after the round trip back to the app.
+ * Resolves null when there was no pending redirect. Called once at startup.
+ */
+export function completeRedirectSignIn(): Promise<User | null> {
+  if (!isFirebaseConfigured()) return Promise.resolve(null)
+  return getRedirectResult(ensureAuth()).then((result) => result?.user ?? null)
 }
 
 /**

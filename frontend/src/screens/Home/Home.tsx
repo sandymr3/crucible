@@ -136,9 +136,21 @@ export default function Home() {
                 My sessions
               </Button>
             ) : (
-              <Button variant="ghost" size="compact" onClick={() => auth.signInGoogle()}>
-                Sign in
-              </Button>
+              <>
+                {/* The toast can expire before the user looks up from the popup;
+                    this stays until the next attempt. */}
+                {auth.error && (
+                  <span
+                    role="alert"
+                    style={{ color: 'var(--t-assay)', font: 'var(--fs-small)', maxWidth: '34ch' }}
+                  >
+                    {auth.error}
+                  </span>
+                )}
+                <Button variant="ghost" size="compact" onClick={() => auth.signInGoogle()}>
+                  Sign in
+                </Button>
+              </>
             )}
           </div>
         </div>
