@@ -3,8 +3,10 @@ import { Route, Routes } from 'react-router-dom'
 import { ToastHost } from './components/primitives'
 import { ThermalField } from './components/thermal/ThermalField'
 import Dev from './screens/Dev/Dev'
+import History from './screens/History/History'
 import Home from './screens/Home/Home'
 import LiveRoom from './screens/LiveRoom/LiveRoom'
+import Study from './screens/Study/Study'
 import Report from './screens/Report/Report'
 import Roadmap from './screens/Roadmap/Roadmap'
 import DigestReveal from './screens/Setup/DigestReveal'
@@ -50,8 +52,8 @@ export default function App() {
           <Route path="/room/:id" element={<LiveRoom />} />
           <Route path="/report/:id" element={<Report />} />
           <Route path="/roadmap/:id" element={<Roadmap />} />
-          <Route path="/study/:id" element={<Placeholder name="Study" />} />
-          <Route path="/history" element={<Placeholder name="History" />} />
+          <Route path="/study/:id" element={<Study />} />
+          <Route path="/history" element={<History />} />
           {import.meta.env.DEV && <Route path="/dev" element={<Dev />} />}
           <Route path="*" element={<Placeholder name="Not found" />} />
         </Routes>

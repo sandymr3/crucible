@@ -5,7 +5,7 @@ import { ArrowRight, Route as RouteIcon } from 'lucide-react'
 import { BandSparkline, PaceDial, Radar } from '../../components/charts'
 import { Button, Label, Panel } from '../../components/primitives'
 import * as api from '../../lib/api'
-import type { Report as ReportData, Turn } from '../../lib/types'
+import type { Report as ReportData, SessionUsage, Turn } from '../../lib/types'
 import { usePending } from '../../lib/usePending'
 import s from './Report.module.css'
 import { TurnAccordion } from './TurnAccordion'
@@ -163,7 +163,35 @@ export default function Report() {
           <TurnAccordion turns={turns} />
         )}
       </Panel>
+
+      <UsageFooter sessionId={id!} />
     </div>
+  )
+}
+
+/**
+ * The session's metered cost, from the backend's per-call token ledger.
+ * One honest line — "here is what this session actually consumed" — because
+ * unit economics you can quote beat unit economics you estimate.
+ */
+function UsageFooter({ sessionId }: { sessionId: string }) {
+  const [usage, setUsage] = useState<SessionUsage | null>(null)
+
+  useEffect(() => {
+    api.getSessionUsage(sessionId).then(setUsage).catch(() => setUsage(null))
+  }, [sessionId])
+
+  if (!usage || usage.cost.totalTokens === 0) return null
+
+  const { cost } = usage
+  const audio = cost.promptAudioTokens + cost.responseAudioTokens
+  return (
+    <p className={s.usageLine}>
+      This session consumed {cost.totalTokens.toLocaleString()} tokens across{' '}
+      {cost.calls} model calls
+      {audio > 0 ? ` — ${audio.toLocaleString()} of them audio, the expensive kind` : ''}.
+      Metered per call, not estimated.
+    </p>
   )
 }
 

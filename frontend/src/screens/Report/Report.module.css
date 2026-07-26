@@ -479,3 +479,11 @@
     animation-duration: 3s;
   }
 }
+
+/* The metered-cost line. Quiet on purpose: it is a receipt, not a headline. */
+.usageLine {
+  margin-top: var(--s-4);
+  font: var(--fs-small);
+  color: var(--dust);
+  text-align: center;
+}

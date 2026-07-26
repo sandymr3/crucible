@@ -1,0 +1,223 @@
+/* Study Mode: drill card + mastery rail. Text-first by design — drilling is
+   faster typed, and voice belongs to the interview room. */
+
+.page {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: var(--s-8) var(--s-5) var(--s-10);
+}
+
+.header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--s-4);
+  margin-bottom: var(--s-6);
+}
+
+.crumb {
+  font: var(--fs-small);
+  color: var(--ash);
+  text-decoration: none;
+}
+
+.crumb:hover {
+  color: var(--bone);
+}
+
+.title {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  font: var(--fs-h1);
+  letter-spacing: var(--tr-h1);
+  color: var(--bone);
+  margin-top: var(--s-2);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: var(--s-4);
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.notice {
+  color: var(--ash);
+  font: var(--fs-body);
+  padding: var(--s-6) 0;
+}
+
+/* ── building ────────────────────────────────────────────────────────── */
+
+.building {
+  display: grid;
+  gap: var(--s-3);
+  padding: var(--s-2) 0 var(--s-4);
+  color: var(--bone);
+  font: var(--fs-body);
+  max-width: 56ch;
+}
+
+.buildingNote {
+  color: var(--ash);
+  font: var(--fs-small);
+}
+
+.pulseBar {
+  height: 4px;
+  border-radius: var(--r-full);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklch, var(--t-cool) 60%, transparent),
+    transparent
+  );
+  background-size: 40% 100%;
+  background-repeat: no-repeat;
+  animation: sweep 1.8s ease-in-out infinite;
+}
+
+@keyframes sweep {
+  0% {
+    background-position: -40% 0;
+  }
+  100% {
+    background-position: 140% 0;
+  }
+}
+
+/* ── drill ───────────────────────────────────────────────────────────── */
+
+.drill {
+  display: grid;
+  gap: var(--s-4);
+  padding-bottom: var(--s-2);
+}
+
+.question {
+  font: var(--fs-quote);
+  font-style: italic;
+  color: var(--bone);
+  max-width: 64ch;
+}
+
+.answer {
+  min-height: 160px;
+  resize: vertical;
+  padding: var(--s-4);
+  background: var(--vessel-high);
+  border: 1px solid var(--rim);
+  border-radius: var(--r-control);
+  color: var(--bone);
+  font: var(--fs-body);
+}
+
+.answer::placeholder {
+  color: var(--dust);
+}
+
+.drillActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--s-4);
+}
+
+.kbdHint {
+  font: var(--fs-mono-sm);
+  letter-spacing: var(--tr-mono-sm);
+  color: var(--dust);
+}
+
+/* ── result ──────────────────────────────────────────────────────────── */
+
+.result {
+  display: grid;
+  gap: var(--s-4);
+  padding-bottom: var(--s-2);
+}
+
+.resultHead {
+  display: flex;
+  align-items: center;
+  gap: var(--s-5);
+}
+
+.resultScore {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 44px;
+  color: var(--t-warm);
+}
+
+.resultScore[data-passed] {
+  color: var(--state-live);
+}
+
+.resultMastery {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  color: var(--ash);
+}
+
+.resultSummary {
+  font: var(--fs-body);
+  color: var(--bone);
+  max-width: 62ch;
+}
+
+.resultMissing {
+  font: var(--fs-small);
+  color: var(--ash);
+}
+
+.unlocked {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  font: var(--fs-small);
+  color: var(--state-live);
+}
+
+/* ── mastery rail ────────────────────────────────────────────────────── */
+
+.rail {
+  position: sticky;
+  top: var(--s-4);
+}
+
+.railEmpty {
+  color: var(--dust);
+  font: var(--fs-small);
+  padding: var(--s-2) 0 var(--s-4);
+}
+
+.masteryList {
+  list-style: none;
+  display: grid;
+  gap: var(--s-2);
+  padding-bottom: var(--s-3);
+}
+
+.masteryRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-3);
+}
+
+.masteryName {
+  font: var(--fs-small);
+  color: var(--bone);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
