@@ -23,16 +23,52 @@
 /* At 1280x800 — the projector target — this leaves a 592px transcript, which
    clears the 520px floor. If space is needed, take it from the right rail and
    never from the centre.
-   The breakpoint is 1207px rather than a round number because that is exactly
-   where the arithmetic stops working: 520 + 300 + 340 + two 12px gaps + 24px of
-   padding is 1208. A single pixel below and minmax's floor forces the grid
-   wider than the viewport, and the room scrolls sideways. */
-@media (max-width: 1207px) {
+
+   Content COMPRESSES and then RESTACKS, but never disappears. The original
+   design hid the right rail below 1207px — and a 125% Windows display scale
+   makes a 1280-wide window an effective ~1024px, so the score matrix simply
+   never existed for anyone on a scaled laptop. */
+@media (max-width: 1320px) {
   .room {
-    grid-template-columns: 280px minmax(0, 1fr);
+    grid-template-columns: 272px minmax(420px, 1fr) 296px;
+  }
+}
+
+/* Below ~1040px three columns genuinely cannot fit: the evaluation rail moves
+   under the transcript as a wrapping card row, and the page gains a vertical
+   scrollbar instead of clipping. */
+@media (max-width: 1040px) {
+  .room {
+    grid-template-columns: 260px minmax(0, 1fr);
+    grid-template-rows: 64px minmax(480px, auto) auto 44px;
+    height: auto;
+    min-height: 100dvh;
+    overflow: visible;
   }
   .rightRail {
-    display: none;
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    align-items: start;
+    overflow: visible;
+  }
+}
+
+/* A short viewport (laptop + taskbar + browser chrome at 125% scale) must
+   scroll rather than clip — overflow:hidden here is how the answer button
+   ended up unreachable below the fold. */
+@media (max-height: 700px) {
+  .room {
+    height: auto;
+    min-height: 100dvh;
+    overflow: visible;
+    grid-template-rows: 64px minmax(500px, auto) 44px;
+  }
+}
+
+@media (max-height: 700px) and (max-width: 1040px) {
+  .room {
+    grid-template-rows: 64px minmax(500px, auto) auto 44px;
   }
 }
 
@@ -108,6 +144,12 @@
   gap: var(--s-3);
 }
 
+/* The rail's Panel must be able to shrink for .railScroll to take over —
+   without min-height:0 the flex chain refuses and clips instead. */
+.leftRail > * {
+  min-height: 0;
+}
+
 .rightRail {
   overflow-y: auto;
   overscroll-behavior: contain;
@@ -144,8 +186,64 @@
   color: var(--dust);
 }
 
+/* The question and hint stack scrolls; the controls below it never move.
+   Without this split, a long question pushed the controls off the panel and
+   the room's no-scroll rule made them unreachable. */
+.railScroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
 .controls {
   margin-top: auto;
+  padding-top: var(--s-3);
+  border-top: 1px solid var(--rim);
+  display: grid;
+  gap: var(--s-3);
+  flex: none;
+}
+
+.controlsHint {
+  font: var(--fs-small);
+  color: var(--dust);
+  text-align: center;
+  margin: 0;
+}
+
+/* Recording state: the pulse is reserved for a genuinely hot microphone. */
+.recDot {
+  width: 14px;
+  height: 14px;
+  border-radius: var(--r-full);
+  background: currentColor;
+  animation: recPulse 1.2s ease-in-out infinite;
+  flex: none;
+}
+
+.recElapsed {
+  margin-left: var(--s-3);
+  font: var(--fs-mono-sm);
+  letter-spacing: var(--tr-mono-sm);
+  font-variant-numeric: tabular-nums;
+  opacity: 0.85;
+}
+
+.recordHot {
+  animation: recGlow 1.6s ease-in-out infinite;
+}
+
+@keyframes recPulse {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@keyframes recGlow {
+  50% {
+    box-shadow: 0 0 0 6px color-mix(in oklch, var(--t-assay) 22%, transparent);
+  }
 }
 
 .hintCard {

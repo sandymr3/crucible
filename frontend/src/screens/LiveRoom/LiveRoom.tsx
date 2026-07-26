@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { CornerDownLeft, Keyboard, Lightbulb, Mic, Square } from 'lucide-react'
+import { Keyboard, Lightbulb, Mic, Square } from 'lucide-react'
 
 import { BandIndicator } from '../../components/band/BandIndicator'
 import { Orb, useAmplitude } from '../../components/orb'
@@ -123,6 +123,14 @@ export default function LiveRoom() {
 
   const elapsed = session.startedAt ? now - session.startedAt : 0
   const remaining = SESSION_MAX_MS - elapsed
+
+  // Recording stopwatch for the mic button. Client-side by design — the
+  // boundary the timer describes is the client's own activity_start.
+  const recStart = useRef<number | null>(null)
+  useEffect(() => {
+    recStart.current = session.micHot ? Date.now() : null
+  }, [session.micHot])
+  const recElapsed = session.micHot && recStart.current ? now - recStart.current : 0
   const currentTurn = session.turns[session.turns.length - 1]
   const closedTurns = session.turns.filter((turn) => turn.closed).length
   const persona = session.persona ?? 'tech_lead'
@@ -182,41 +190,58 @@ export default function LiveRoom() {
             </Label>
           </div>
 
-          <p className={`${s.question} ${currentTurn?.question ? '' : s.questionEmpty}`}>
-            {currentTurn?.question || 'Waiting for the first question…'}
-          </p>
+          {/* Scrolls when a long question or stacked hints overflow a short
+              viewport. Without this the controls below were pushed off-panel
+              and clipped — the room's page never scrolls, so they were gone. */}
+          <div className={s.railScroll}>
+            <p className={`${s.question} ${currentTurn?.question ? '' : s.questionEmpty}`}>
+              {currentTurn?.question || 'Waiting for the first question…'}
+            </p>
 
-          {currentTurn?.hints.map((hint, i) => (
-            <div className={s.hintCard} key={i}>
-              {hint.text}
-              <span className={s.hintPenalty}>−{hint.penalty.toFixed(1)} to this answer</span>
-            </div>
-          ))}
+            {currentTurn?.hints.map((hint, i) => (
+              <div className={s.hintCard} key={i}>
+                {hint.text}
+                <span className={s.hintPenalty}>−{hint.penalty.toFixed(1)} to this answer</span>
+              </div>
+            ))}
+          </div>
 
           <div className={s.controls}>
+            {/* THE control of the screen. One button, two unmistakable states:
+                idle it is the screen's single primary action; recording it is
+                red, pulsing, timed, and labelled with what clicking does. */}
+            <Button
+              variant={session.micHot ? 'danger' : typing ? 'secondary' : 'primary'}
+              size="hero"
+              block
+              className={session.micHot ? s.recordHot : ''}
+              icon={
+                session.micHot ? (
+                  <span className={s.recDot} aria-hidden="true" />
+                ) : (
+                  <Mic size={22} strokeWidth={1.75} />
+                )
+              }
+              onClick={session.micHot ? session.endAnswer : session.startAnswer}
+              disabled={!canAnswer && !session.micHot}
+              title="Ctrl+Enter"
+            >
+              {session.micHot ? (
+                <>
+                  I’m done — grade my answer
+                  <span className={s.recElapsed}>{clock(recElapsed)}</span>
+                </>
+              ) : (
+                'Answer out loud'
+              )}
+            </Button>
+            <p className={s.controlsHint}>
+              {session.micHot
+                ? 'Recording. Click when you finish speaking — or press Ctrl+Enter.'
+                : 'Or answer without a microphone:'}
+            </p>
+
             <ButtonGroup>
-              <Button
-                variant="ghost"
-                icon={<Lightbulb size={20} strokeWidth={1.5} />}
-                onClick={session.requestHint}
-                disabled={!canAnswer}
-              >
-                Request a hint
-              </Button>
-              <Button
-                variant="ghost"
-                icon={
-                  session.micHot ? (
-                    <CornerDownLeft size={20} strokeWidth={1.5} />
-                  ) : (
-                    <Mic size={20} strokeWidth={1.5} />
-                  )
-                }
-                onClick={session.micHot ? session.endAnswer : session.startAnswer}
-                disabled={!canAnswer && !session.micHot}
-              >
-                {session.micHot ? 'I’m done answering' : 'Answer'}
-              </Button>
               <Button
                 variant="ghost"
                 icon={<Keyboard size={20} strokeWidth={1.5} />}
@@ -228,7 +253,15 @@ export default function LiveRoom() {
                 Type instead
               </Button>
               <Button
-                variant="danger"
+                variant="ghost"
+                icon={<Lightbulb size={20} strokeWidth={1.5} />}
+                onClick={session.requestHint}
+                disabled={!canAnswer}
+              >
+                Request a hint
+              </Button>
+              <Button
+                variant="ghost"
                 icon={<Square size={20} strokeWidth={1.5} />}
                 onClick={() => setConfirmEnd(true)}
               >
@@ -271,13 +304,14 @@ export default function LiveRoom() {
               />
               <Button
                 variant="primary"
+                title="Ctrl+Enter"
                 onClick={() => {
                   session.sendText(draft)
                   setDraft('')
                 }}
                 disabled={!draft.trim()}
               >
-                Send
+                Send answer
               </Button>
             </div>
           )}
