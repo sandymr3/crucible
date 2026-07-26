@@ -51,10 +51,16 @@ export default function StartSession() {
   const [error, setError] = useState<string | null>(null)
 
   async function create() {
+    if (!auth.configured) {
+      setError(
+        'Firebase is not configured — copy .env.example to .env.local and fill in the VITE_FIREBASE_* values.',
+      )
+      return
+    }
     setBusy(true)
     setError(null)
     try {
-      if (!auth.user && auth.configured) await auth.signInGuest()
+      if (!auth.user) await auth.signInGuest()
 
       const session = await api.createSession({
         mode,

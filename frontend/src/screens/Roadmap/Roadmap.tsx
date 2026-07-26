@@ -7,16 +7,21 @@ import * as api from '../../lib/api'
 import { PERSONA_FALLBACK_NAME } from '../../lib/persona'
 import type { Roadmap as RoadmapData } from '../../lib/types'
 import { usePending } from '../../lib/usePending'
+import { useAuth } from '../../store/auth'
 import s from '../Report/Report.module.css'
 
 export default function Roadmap() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
 
+  // Gated on auth restore: fetching before Firebase rehydrates the user sends
+  // no Authorization header and 401s a signed-in refresh or back-navigation.
+  const authLoading = useAuth((state) => state.loading)
   const fetchRoadmap = useCallback(() => api.getRoadmap(id!), [id])
-  const { value: plan, status, error, settled } = usePending<RoadmapData>(fetchRoadmap, {
-    enabled: Boolean(id),
-  })
+  const { value: plan, status, error, unauthenticated, settled, refetch } =
+    usePending<RoadmapData>(fetchRoadmap, {
+      enabled: Boolean(id) && !authLoading,
+    })
 
   const [starting, setStarting] = useState(false)
   const [retestError, setRetestError] = useState<string | null>(null)
@@ -44,7 +49,17 @@ export default function Roadmap() {
     }
   }
 
-  if (!settled || !plan) return <Waiting status={status} error={error} sessionId={id} />
+  if (!settled || !plan) {
+    return (
+      <Waiting
+        status={status}
+        error={error}
+        sessionId={id}
+        unauthenticated={unauthenticated}
+        onRetry={refetch}
+      />
+    )
+  }
 
   return (
     <div className={s.page}>
@@ -167,12 +182,37 @@ function Waiting({
   status,
   error,
   sessionId,
+  unauthenticated,
+  onRetry,
 }: {
   status: string
   error: string | null
   sessionId?: string
+  unauthenticated: boolean
+  onRetry: () => void
 }) {
+  const signInGoogle = useAuth((state) => state.signInGoogle)
+
   if (status === 'error') {
+    // A 401 is recoverable — sign in and try again in place, rather than a
+    // dead end that renders the raw "unauthenticated" string.
+    if (unauthenticated) {
+      return (
+        <div className={s.waiting}>
+          <h1 className={s.waitingTitle}>Sign in to view this plan</h1>
+          <p className={s.waitingBody}>Study plans are private to the account that ran the session.</p>
+          <Button
+            variant="primary"
+            onClick={async () => {
+              await signInGoogle()
+              onRetry()
+            }}
+          >
+            Sign in with Google
+          </Button>
+        </div>
+      )
+    }
     return (
       <div className={s.waiting}>
         <h1 className={s.waitingTitle}>That plan could not be loaded</h1>

@@ -30,7 +30,7 @@ function messageOf(error: unknown): string {
     // Firebase's own copy is opaque ("auth/popup-closed-by-user"), so the few
     // a user can act on are translated and the rest fall through.
     if (error.message.includes('popup-closed-by-user'))
-      return 'The sign-in window closed early. Click Sign in again — the retry uses a full-page redirect instead.'
+      return 'The sign-in window closed before finishing. Click Sign in to try again.'
     if (error.message.includes('popup-blocked')) return 'Your browser blocked the sign-in popup.'
     if (error.message.includes('unauthorized-domain'))
       return 'This domain is not authorised for sign-in. (Firebase console → Authentication → Settings → Authorized domains.)'
@@ -94,7 +94,9 @@ export const useAuth = create<AuthState>((set) => ({
  * mount would otherwise subscribe twice.
  */
 onAuthChange((user) => {
-  useAuth.setState({ user, loading: false })
+  // A successful sign-in clears any earlier failure — the error banner must
+  // not outlive the problem it reported.
+  useAuth.setState(user ? { user, loading: false, error: null } : { user, loading: false })
 })
 
 /**

@@ -127,7 +127,7 @@ export default function Study() {
     return () => {
       cancelled = true
     }
-  }, [id, advance, refreshMastery])
+  }, [id, authLoading, advance, refreshMastery])
 
   async function submit() {
     if (phase.kind !== 'question' || !id) return

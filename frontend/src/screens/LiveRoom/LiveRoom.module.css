@@ -56,8 +56,12 @@
 
 /* A short viewport (laptop + taskbar + browser chrome at 125% scale) must
    scroll rather than clip — overflow:hidden here is how the answer button
-   ended up unreachable below the fold. */
-@media (max-height: 700px) {
+   ended up unreachable below the fold.
+
+   760px, not 700px: the fixed rows (64px header + 44px status bar + gaps and
+   padding) plus the 500px transcript floor need ~760px, so anything shorter
+   was clipping in the 701–760px band that neither query used to catch. */
+@media (max-height: 760px) {
   .room {
     height: auto;
     min-height: 100dvh;
@@ -66,7 +70,7 @@
   }
 }
 
-@media (max-height: 700px) and (max-width: 1040px) {
+@media (max-height: 760px) and (max-width: 1040px) {
   .room {
     grid-template-rows: 64px minmax(500px, auto) auto 44px;
   }
@@ -150,9 +154,13 @@
   min-height: 0;
 }
 
+/* No overscroll-behavior on any of these panes: `contain` swallows the wheel
+   whenever the pane under the pointer has nothing left to scroll, which in the
+   responsive layouts (where the PAGE is the scroller) left the page reachable
+   only by dragging the scrollbar. In the fixed-height room chaining is a no-op
+   anyway — the page has overflow:hidden. */
 .rightRail {
   overflow-y: auto;
-  overscroll-behavior: contain;
 }
 
 /* ── left rail ───────────────────────────────────────────────────────── */
@@ -193,7 +201,6 @@
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  overscroll-behavior: contain;
 }
 
 .controls {
@@ -273,7 +280,6 @@
 .scroller {
   height: 100%;
   overflow-y: auto;
-  overscroll-behavior: contain;
   padding: 0 var(--s-5) var(--s-6);
   scroll-behavior: smooth;
 }

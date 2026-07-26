@@ -1,4 +1,5 @@
-import { Route, Routes } from 'react-router-dom'
+import { useEffect } from 'react'
+import { Route, Routes, useLocation, useNavigationType } from 'react-router-dom'
 
 import { ToastHost } from './components/primitives'
 import { ThermalField } from './components/thermal/ThermalField'
@@ -33,9 +34,24 @@ function Placeholder({ name }: { name: string }) {
   )
 }
 
+/**
+ * New navigations (PUSH/REPLACE) start at the top of the page; POP — the back
+ * and forward buttons — is left to the browser's own scroll restoration.
+ * React Router does neither by itself.
+ */
+function ScrollToTop() {
+  const { pathname } = useLocation()
+  const navigationType = useNavigationType()
+  useEffect(() => {
+    if (navigationType !== 'POP') window.scrollTo(0, 0)
+  }, [pathname, navigationType])
+  return null
+}
+
 export default function App() {
   return (
     <>
+      <ScrollToTop />
       <ThermalField />
       {/* Content sits above the fixed field. #root isolates the stacking
           context, so this is the only z-index the app needs. */}
