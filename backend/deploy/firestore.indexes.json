@@ -1,0 +1,14 @@
+{
+  "//": "Composite indexes the queries in internal/store/firestore.go require. Deploy with: gcloud firestore indexes composite create --collection-group=sessions --field-config=field-path=uid,order=ascending --field-config=field-path=createdAt,order=descending (or `firebase deploy --only firestore:indexes`). ListSessions (uid == X ORDER BY createdAt DESC) 500s without the first entry — found the hard way when the History screen became the first caller of GET /v1/sessions.",
+  "indexes": [
+    {
+      "collectionGroup": "sessions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "uid", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}
