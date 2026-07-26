@@ -1,5 +1,6 @@
 {
   "hosting": {
+    "site": "crucible-hack-0725",
     "public": "dist",
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "rewrites": [

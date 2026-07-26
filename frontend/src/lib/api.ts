@@ -263,8 +263,17 @@ export const getMastery = (id: string) => json<MasteryMap>(`/sessions/${id}/mast
  * logging a full URL. Do not add a logger that prints this.
  */
 export function liveSocketUrl(sessionId: string, token: string, voice?: string): string {
-  const scheme = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
-  const url = new URL(`${scheme}//${window.location.host}${BASE}/sessions/${sessionId}/live`)
+  // Firebase Hosting's Cloud Run rewrite carries every REST call but CANNOT
+  // proxy a WebSocket upgrade, so in production the socket must go directly
+  // to the Cloud Run origin. VITE_SOCKET_ORIGIN is baked at build time for
+  // that; unset (dev), the socket stays same-origin through the Vite proxy.
+  // The backend's CheckOrigin accepts this deliberately — a socket is
+  // authorised by its Firebase ID token, not by its Origin header.
+  const socketOrigin = import.meta.env.VITE_SOCKET_ORIGIN as string | undefined
+  const base = socketOrigin
+    ? socketOrigin.replace(/^http/, 'ws')
+    : `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}`
+  const url = new URL(`${base}${BASE}/sessions/${sessionId}/live`)
   url.searchParams.set('token', token)
   if (voice) url.searchParams.set('voice', voice)
   return url.toString()
