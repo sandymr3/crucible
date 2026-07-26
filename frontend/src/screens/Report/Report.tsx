@@ -7,6 +7,7 @@ import { Button, Label, Panel } from '../../components/primitives'
 import * as api from '../../lib/api'
 import type { Report as ReportData, SessionUsage, Turn } from '../../lib/types'
 import { usePending } from '../../lib/usePending'
+import { useAuth } from '../../store/auth'
 import s from './Report.module.css'
 import { TurnAccordion } from './TurnAccordion'
 
@@ -21,10 +22,14 @@ export default function Report() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
 
+  // Gated on auth restore: fetching before Firebase rehydrates the user sends
+  // no Authorization header and 401s a signed-in refresh or back-navigation.
+  const authLoading = useAuth((state) => state.loading)
   const fetchReport = useCallback(() => api.getReport(id!), [id])
-  const { value: report, status, error, settled } = usePending<ReportData>(fetchReport, {
-    enabled: Boolean(id),
-  })
+  const { value: report, status, error, unauthenticated, settled, refetch } =
+    usePending<ReportData>(fetchReport, {
+      enabled: Boolean(id) && !authLoading,
+    })
 
   const [turns, setTurns] = useState<Turn[]>([])
 
@@ -37,7 +42,15 @@ export default function Report() {
   }, [id, status])
 
   if (!settled || !report) {
-    return <Waiting status={status} error={error} sessionId={id} />
+    return (
+      <Waiting
+        status={status}
+        error={error}
+        sessionId={id}
+        unauthenticated={unauthenticated}
+        onRetry={refetch}
+      />
+    )
   }
 
   const graded = report.turnsGraded
@@ -250,12 +263,37 @@ function Waiting({
   status,
   error,
   sessionId,
+  unauthenticated,
+  onRetry,
 }: {
   status: string
   error: string | null
   sessionId?: string
+  unauthenticated: boolean
+  onRetry: () => void
 }) {
+  const signInGoogle = useAuth((state) => state.signInGoogle)
+
   if (status === 'error') {
+    // A 401 is recoverable — sign in and try again in place, rather than a
+    // dead end that renders the raw "unauthenticated" string.
+    if (unauthenticated) {
+      return (
+        <div className={s.waiting}>
+          <h1 className={s.waitingTitle}>Sign in to view this report</h1>
+          <p className={s.waitingBody}>Reports are private to the account that ran the session.</p>
+          <Button
+            variant="primary"
+            onClick={async () => {
+              await signInGoogle()
+              onRetry()
+            }}
+          >
+            Sign in with Google
+          </Button>
+        </div>
+      )
+    }
     return (
       <div className={s.waiting}>
         <h1 className={s.waitingTitle}>That report could not be loaded</h1>

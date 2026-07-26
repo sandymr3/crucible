@@ -63,9 +63,11 @@
   min-height: 0;
 }
 
+/* No overscroll-behavior: `contain` swallows the wheel when the body has
+   nothing left to scroll, leaving pages that scroll themselves reachable only
+   by dragging the scrollbar. */
 .panel[data-scroll='true'] .body {
   overflow-y: auto;
-  overscroll-behavior: contain;
   flex: 1;
 }
 

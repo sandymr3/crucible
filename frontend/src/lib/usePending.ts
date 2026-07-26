@@ -34,7 +34,12 @@ export function usePending<T>(
   const [value, setValue] = useState<T | null>(null)
   const [status, setStatus] = useState<PendingStatus>('loading')
   const [error, setError] = useState<string | null>(null)
+  const [unauthenticated, setUnauthenticated] = useState(false)
   const [elapsed, setElapsed] = useState(0)
+  // Bumped by refetch() to restart the whole poll loop — a single re-run of
+  // load() would stop again after one attempt even if the answer is still
+  // `generating`.
+  const [attempt, setAttempt] = useState(0)
 
   // Held in a ref so a caller may pass an inline arrow without restarting the
   // poll on every render.
@@ -48,15 +53,26 @@ export function usePending<T>(
       if (result.ready) {
         setValue(result.value)
         setStatus('ready')
+        setError(null)
+        setUnauthenticated(false)
         return 'ready'
       }
       setStatus(result.status)
       return result.status
     } catch (err) {
       setError(err instanceof ApiError || err instanceof Error ? err.message : String(err))
+      setUnauthenticated(err instanceof ApiError && err.isUnauthenticated)
       setStatus('error')
       return 'error'
     }
+  }, [])
+
+  /** Clears the error and restarts polling from scratch. */
+  const refetch = useCallback(() => {
+    setStatus('loading')
+    setError(null)
+    setUnauthenticated(false)
+    setAttempt((n) => n + 1)
   }, [])
 
   useEffect(() => {
@@ -81,7 +97,7 @@ export function usePending<T>(
       cancelled = true
       clearTimeout(timer)
     }
-  }, [enabled, intervalMs, load])
+  }, [enabled, intervalMs, load, attempt])
 
-  return { value, status, error, elapsed, settled: isSettled(status), refetch: load }
+  return { value, status, error, unauthenticated, elapsed, settled: isSettled(status), refetch }
 }

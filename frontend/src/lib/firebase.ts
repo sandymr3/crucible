@@ -3,12 +3,15 @@ import {
   GoogleAuthProvider,
   getAuth,
   getRedirectResult,
+  linkWithPopup,
   onAuthStateChanged,
   signInAnonymously,
+  signInWithCredential,
   signInWithPopup,
   signInWithRedirect,
   signOut,
   type Auth,
+  type AuthError,
   type User,
 } from 'firebase/auth'
 
@@ -68,6 +71,27 @@ function ensureAuth(): Auth {
 
 export type AuthUser = User
 
+let authReady: Promise<void> | null = null
+
+/**
+ * Resolves once the SDK has restored (or ruled out) a persisted user. On a
+ * cold load `currentUser` is null for the first few hundred milliseconds while
+ * IndexedDB is read; anything that reads it before then sees "signed out" for
+ * a user who is signed in.
+ */
+function whenAuthReady(): Promise<void> {
+  if (!isFirebaseConfigured()) return Promise.resolve()
+  if (!authReady) {
+    authReady = new Promise((resolve) => {
+      const unsubscribe = onAuthStateChanged(ensureAuth(), () => {
+        resolve()
+        unsubscribe()
+      })
+    })
+  }
+  return authReady
+}
+
 /**
  * Subscribes to sign-in state. Returns an unsubscribe function.
  *
@@ -93,38 +117,43 @@ const POPUP_MECHANISM_FAILURES = [
 ]
 
 /**
- * Set after a popup closes without completing. A user genuinely cancelling and
- * a popup being killed by the environment produce the same error code, so the
- * first close is treated as a cancel — and the NEXT attempt goes straight to
- * the full-page redirect flow, which nothing can close early.
- */
-let popupClosedOnce = false
-
-/**
  * Google sign-in. Popup first; falls back to redirect when the popup path is
  * unavailable. Resolves null when a redirect navigation has started — the
  * result arrives via completeRedirectSignIn() after the round trip.
+ *
+ * A closed popup is a cancel, nothing more: the error is rethrown and the next
+ * attempt opens a fresh popup. It must never demote future attempts to the
+ * redirect flow — storage partitioning against the auth domain makes redirect
+ * sign-in silently drop the result on modern browsers.
+ *
+ * A guest who signs in keeps their sessions: linking upgrades the anonymous
+ * account in place, preserving the UID the backend keys everything by.
  */
 export async function signInWithGoogle(): Promise<User | null> {
   const provider = new GoogleAuthProvider()
   const authInstance = ensureAuth()
-
-  if (popupClosedOnce) {
-    await signInWithRedirect(authInstance, provider)
-    return null
-  }
+  const anon = authInstance.currentUser?.isAnonymous ? authInstance.currentUser : null
 
   try {
-    const result = await signInWithPopup(authInstance, provider)
+    const result = anon
+      ? await linkWithPopup(anon, provider)
+      : await signInWithPopup(authInstance, provider)
     return result.user
   } catch (error) {
     const code = (error as { code?: string }).code ?? ''
+    // The Google account already exists as its own user, so linking is
+    // impossible. Sign into that account instead; the guest's sessions stay
+    // on the abandoned anonymous UID, which beats failing the sign-in.
+    if (anon && (code.includes('credential-already-in-use') || code.includes('email-already-in-use'))) {
+      const credential = GoogleAuthProvider.credentialFromError(error as AuthError)
+      const result = credential
+        ? await signInWithCredential(authInstance, credential)
+        : await signInWithPopup(authInstance, provider)
+      return result.user
+    }
     if (POPUP_MECHANISM_FAILURES.some((c) => code.includes(c))) {
       await signInWithRedirect(authInstance, provider)
       return null
-    }
-    if (code.includes('popup-closed-by-user') || code.includes('cancelled-popup-request')) {
-      popupClosedOnce = true
     }
     throw error
   }
@@ -158,9 +187,14 @@ export function signOutUser(): Promise<void> {
  * The SDK refreshes on its own as expiry approaches, so this is called per
  * request rather than cached. Caching it is how a long interview ends with a
  * sudden 401 partway through.
+ *
+ * Waits for the persisted user to be restored first: a request fired during
+ * the first render of a cold load would otherwise go out unauthenticated and
+ * 401 for someone who is signed in.
  */
 export async function getIdToken(): Promise<string | null> {
   if (!isFirebaseConfigured()) return null
+  await whenAuthReady()
   const user = ensureAuth().currentUser
   return user ? user.getIdToken() : null
 }
